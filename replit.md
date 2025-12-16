@@ -30,12 +30,22 @@ The client code lives in the `client/` directory with screens, components, navig
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express
-- **API Style**: RESTful JSON API with internationalization support (Georgian and English)
+- **API Style**: RESTful JSON API with full internationalization support (Georgian and English)
 - **Database ORM**: Drizzle ORM with PostgreSQL
 - **Schema Location**: `shared/schema.ts` contains all database table definitions
 - **Routes**: Centralized in `server/routes.ts` handling languages, categories, translators, users, and calls
+- **Internationalization**: `server/i18n.ts` provides bilingual responses for all API endpoints
 
 The server uses a storage abstraction layer (`server/storage.ts`) that wraps Drizzle queries, making it easier to test and modify data access patterns.
+
+### Bilingual API Response Format
+All API responses include both Georgian and English text:
+- **Success responses**: `{ data: {...}, locale: "en" | "ka" }`
+- **Error responses**: `{ error: "...", errorKa: "...", errorEn: "...", locale }`
+- **Categories/Languages**: Include both `name` (Georgian) and `nameEn` (English) fields
+- **Online count**: Returns `labelKa` and `labelEn` for display text
+
+The locale is determined by the `Accept-Language` header ("ka" for Georgian, "en" for English).
 
 ### Data Models
 - **Users**: Basic user profiles with language preferences
