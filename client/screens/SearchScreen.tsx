@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { View, StyleSheet, FlatList, TextInput } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, StyleSheet, FlatList, TextInput, ActivityIndicator } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -16,6 +17,21 @@ import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<SearchStackParamList>;
 
+interface ApiTranslator {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  bio: string;
+  rating: number;
+  totalCalls: number;
+  totalMinutes: number;
+  isOnline: boolean;
+  isVerified: boolean;
+  languages: { from: string; to: string }[];
+  categories: string[];
+}
+
 export default function SearchScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -23,7 +39,30 @@ export default function SearchScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTranslators = mockTranslators.filter((translator) =>
+  const { data: translatorsData, isLoading } = useQuery<{ data: ApiTranslator[] } | ApiTranslator[]>({
+    queryKey: ["/api/translators"],
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const translators: Translator[] = useMemo(() => {
+    const rawData = Array.isArray(translatorsData) ? translatorsData : translatorsData?.data;
+    if (rawData) {
+      return rawData.map((t) => ({
+        id: t.id,
+        name: t.name,
+        avatarUrl: t.avatarUrl || undefined,
+        rating: Number(t.rating),
+        totalCalls: t.totalCalls,
+        languages: t.languages,
+        categories: t.categories,
+        isOnline: t.isOnline,
+        bio: t.bio,
+      }));
+    }
+    return mockTranslators;
+  }, [translatorsData]);
+
+  const filteredTranslators = translators.filter((translator) =>
     translator.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -40,17 +79,29 @@ export default function SearchScreen() {
     />
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <Feather name="search" size={48} color={theme.textSecondary} />
-      <ThemedText type="h4" style={styles.emptyTitle}>
-        No translators found
-      </ThemedText>
-      <ThemedText style={[styles.emptyText, { color: theme.textSecondary }]}>
-        Try adjusting your search query
-      </ThemedText>
-    </View>
-  );
+  const renderEmptyState = () => {
+    if (isLoading) {
+      return (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <ThemedText style={[styles.emptyText, { color: theme.textSecondary, marginTop: Spacing.lg }]}>
+            Loading translators...
+          </ThemedText>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <Feather name="search" size={48} color={theme.textSecondary} />
+        <ThemedText type="h4" style={styles.emptyTitle}>
+          No translators found
+        </ThemedText>
+        <ThemedText style={[styles.emptyText, { color: theme.textSecondary }]}>
+          Try adjusting your search query
+        </ThemedText>
+      </View>
+    );
+  };
 
   return (
     <ThemedView style={styles.container}>

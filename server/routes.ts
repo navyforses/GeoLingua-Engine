@@ -25,6 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("languagesNotFound", locale),
         errorKa: messages.errors.languagesNotFound.ka,
         errorEn: messages.errors.languagesNotFound.en,
+        locale,
       });
     }
   });
@@ -39,6 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("categoriesNotFound", locale),
         errorKa: messages.errors.categoriesNotFound.ka,
         errorEn: messages.errors.categoriesNotFound.en,
+        locale,
       });
     }
   });
@@ -52,6 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("categoryNotFound", locale),
           errorKa: messages.errors.categoryNotFound.ka,
           errorEn: messages.errors.categoryNotFound.en,
+          locale,
         });
       }
       res.json({ data: category, locale });
@@ -60,6 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("categoriesNotFound", locale),
         errorKa: messages.errors.categoriesNotFound.ka,
         errorEn: messages.errors.categoriesNotFound.en,
+        locale,
       });
     }
   });
@@ -74,6 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
+        locale,
       });
     }
   });
@@ -88,6 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
+        locale,
       });
     }
   });
@@ -101,6 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("translatorNotFound", locale),
           errorKa: messages.errors.translatorNotFound.ka,
           errorEn: messages.errors.translatorNotFound.en,
+          locale,
         });
       }
       res.json({ data: translator, locale });
@@ -109,6 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
+        locale,
       });
     }
   });
@@ -123,12 +131,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: getSuccess("statusUpdated", locale),
         messageKa: messages.success.statusUpdated.ka,
         messageEn: messages.success.statusUpdated.en,
+        locale,
       });
     } catch (error) {
       res.status(500).json({ 
         error: getError("translatorStatusUpdateFailed", locale),
         errorKa: messages.errors.translatorStatusUpdateFailed.ka,
         errorEn: messages.errors.translatorStatusUpdateFailed.en,
+        locale,
       });
     }
   });
@@ -142,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("userNotFound", locale),
           errorKa: messages.errors.userNotFound.ka,
           errorEn: messages.errors.userNotFound.en,
+          locale,
         });
       }
       res.json({ data: user, locale });
@@ -150,6 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("userNotFound", locale),
         errorKa: messages.errors.userNotFound.ka,
         errorEn: messages.errors.userNotFound.en,
+        locale,
       });
     }
   });
@@ -164,6 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("userCreateFailed", locale),
         errorKa: messages.errors.userCreateFailed.ka,
         errorEn: messages.errors.userCreateFailed.en,
+        locale,
       });
     }
   });
@@ -183,6 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
+        locale,
       });
     }
   });
@@ -196,6 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
+          locale,
         });
       }
       const callWithStatus = {
@@ -209,6 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
+        locale,
       });
     }
   });
@@ -228,6 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
+        locale,
       });
     }
   });
@@ -248,6 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callCreateFailed", locale),
         errorKa: messages.errors.callCreateFailed.ka,
         errorEn: messages.errors.callCreateFailed.en,
+        locale,
       });
     }
   });
@@ -261,6 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
+          locale,
         });
       }
       const callWithStatus = {
@@ -274,6 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callUpdateFailed", locale),
         errorKa: messages.errors.callUpdateFailed.ka,
         errorEn: messages.errors.callUpdateFailed.en,
+        locale,
       });
     }
   });
@@ -288,6 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
+          locale,
         });
       }
       res.json({ 
@@ -302,6 +323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("callRateFailed", locale),
         errorKa: messages.errors.callRateFailed.ka,
         errorEn: messages.errors.callRateFailed.en,
+        locale,
       });
     }
   });
@@ -323,6 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: getError("onlineCountFailed", locale),
         errorKa: messages.errors.onlineCountFailed.ka,
         errorEn: messages.errors.onlineCountFailed.en,
+        locale,
       });
     }
   });

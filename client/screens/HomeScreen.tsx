@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
@@ -16,7 +17,8 @@ import { RequestTypeToggle } from "@/components/RequestTypeToggle";
 import { OnlineStatus } from "@/components/OnlineStatus";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
-import { categories, mockTranslators } from "@/constants/mockData";
+import { categories as fallbackCategories } from "@/constants/mockData";
+import type { Category } from "@/constants/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -33,7 +35,19 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState("general");
   const [requestType, setRequestType] = useState<"instant" | "scheduled">("instant");
 
-  const onlineCount = mockTranslators.filter((t) => t.isOnline).length;
+  const { data: categoriesData } = useQuery<{ data: Category[] } | Category[]>({
+    queryKey: ["/api/categories"],
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: onlineData } = useQuery<{ data: { count: number; labelKa: string; labelEn: string } }>({
+    queryKey: ["/api/stats/online-count"],
+    staleTime: 1000 * 30,
+    refetchInterval: 30000,
+  });
+
+  const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data || fallbackCategories);
+  const onlineCount = onlineData?.data?.count ?? 0;
   const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
 
   const swapLanguages = () => {
