@@ -4,17 +4,11 @@ import { storage } from "./storage";
 import { seedDatabase } from "./seed";
 import { getLocale, messages, type SupportedLanguage } from "./i18n";
 
-function getError(
-  key: keyof typeof messages.errors,
-  locale: SupportedLanguage,
-) {
+function getError(key: keyof typeof messages.errors, locale: SupportedLanguage) {
   return messages.errors[key][locale];
 }
 
-function getSuccess(
-  key: keyof typeof messages.success,
-  locale: SupportedLanguage,
-) {
+function getSuccess(key: keyof typeof messages.success, locale: SupportedLanguage) {
   return messages.success[key][locale];
 }
 
@@ -26,8 +20,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const languages = await storage.getLanguages();
       res.json({ data: languages, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("languagesNotFound", locale),
         errorKa: messages.errors.languagesNotFound.ka,
         errorEn: messages.errors.languagesNotFound.en,
@@ -41,8 +35,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const categories = await storage.getCategories();
       res.json({ data: categories, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("categoriesNotFound", locale),
         errorKa: messages.errors.categoriesNotFound.ka,
         errorEn: messages.errors.categoriesNotFound.en,
@@ -56,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const category = await storage.getCategory(req.params.id);
       if (!category) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("categoryNotFound", locale),
           errorKa: messages.errors.categoryNotFound.ka,
           errorEn: messages.errors.categoryNotFound.en,
@@ -64,8 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       res.json({ data: category, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("categoriesNotFound", locale),
         errorKa: messages.errors.categoriesNotFound.ka,
         errorEn: messages.errors.categoriesNotFound.en,
@@ -79,8 +73,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const translators = await storage.getTranslators();
       res.json({ data: translators, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
@@ -94,8 +88,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const translators = await storage.getOnlineTranslators();
       res.json({ data: translators, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
@@ -109,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const translator = await storage.getTranslator(req.params.id);
       if (!translator) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("translatorNotFound", locale),
           errorKa: messages.errors.translatorNotFound.ka,
           errorEn: messages.errors.translatorNotFound.en,
@@ -117,8 +111,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       res.json({ data: translator, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("translatorsNotFound", locale),
         errorKa: messages.errors.translatorsNotFound.ka,
         errorEn: messages.errors.translatorsNotFound.en,
@@ -127,37 +121,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch(
-    "/api/translators/:id/status",
-    async (req: Request, res: Response) => {
-      const locale = getLocale(req.headers["accept-language"]);
-      try {
-        const { isOnline } = req.body;
-        await storage.updateTranslatorOnline(req.params.id, isOnline);
-        res.json({
-          success: true,
-          message: getSuccess("statusUpdated", locale),
-          messageKa: messages.success.statusUpdated.ka,
-          messageEn: messages.success.statusUpdated.en,
-          locale,
-        });
-      } catch {
-        res.status(500).json({
-          error: getError("translatorStatusUpdateFailed", locale),
-          errorKa: messages.errors.translatorStatusUpdateFailed.ka,
-          errorEn: messages.errors.translatorStatusUpdateFailed.en,
-          locale,
-        });
-      }
-    },
-  );
+  app.patch("/api/translators/:id/status", async (req: Request, res: Response) => {
+    const locale = getLocale(req.headers["accept-language"]);
+    try {
+      const { isOnline } = req.body;
+      await storage.updateTranslatorOnline(req.params.id, isOnline);
+      res.json({ 
+        success: true, 
+        message: getSuccess("statusUpdated", locale),
+        messageKa: messages.success.statusUpdated.ka,
+        messageEn: messages.success.statusUpdated.en,
+        locale,
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        error: getError("translatorStatusUpdateFailed", locale),
+        errorKa: messages.errors.translatorStatusUpdateFailed.ka,
+        errorEn: messages.errors.translatorStatusUpdateFailed.en,
+        locale,
+      });
+    }
+  });
 
   app.get("/api/users/:id", async (req: Request, res: Response) => {
     const locale = getLocale(req.headers["accept-language"]);
     try {
       const user = await storage.getUser(req.params.id);
       if (!user) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("userNotFound", locale),
           errorKa: messages.errors.userNotFound.ka,
           errorEn: messages.errors.userNotFound.en,
@@ -165,8 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       res.json({ data: user, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("userNotFound", locale),
         errorKa: messages.errors.userNotFound.ka,
         errorEn: messages.errors.userNotFound.en,
@@ -180,8 +171,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = await storage.createUser(req.body);
       res.status(201).json({ data: user, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("userCreateFailed", locale),
         errorKa: messages.errors.userCreateFailed.ka,
         errorEn: messages.errors.userCreateFailed.en,
@@ -194,18 +185,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locale = getLocale(req.headers["accept-language"]);
     try {
       const calls = await storage.getCalls();
-      const callsWithStatus = calls.map((call) => ({
+      const callsWithStatus = calls.map(call => ({
         ...call,
-        statusKa:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.ka || call.status,
-        statusEn:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.en || call.status,
+        statusKa: messages.callStatus[call.status as keyof typeof messages.callStatus]?.ka || call.status,
+        statusEn: messages.callStatus[call.status as keyof typeof messages.callStatus]?.en || call.status,
       }));
       res.json({ data: callsWithStatus, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
@@ -219,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const call = await storage.getCall(req.params.id);
       if (!call) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
@@ -228,16 +215,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const callWithStatus = {
         ...call,
-        statusKa:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.ka || call.status,
-        statusEn:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.en || call.status,
+        statusKa: messages.callStatus[call.status as keyof typeof messages.callStatus]?.ka || call.status,
+        statusEn: messages.callStatus[call.status as keyof typeof messages.callStatus]?.en || call.status,
       };
       res.json({ data: callWithStatus, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
@@ -250,18 +233,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locale = getLocale(req.headers["accept-language"]);
     try {
       const calls = await storage.getUserCalls(req.params.userId);
-      const callsWithStatus = calls.map((call) => ({
+      const callsWithStatus = calls.map(call => ({
         ...call,
-        statusKa:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.ka || call.status,
-        statusEn:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.en || call.status,
+        statusKa: messages.callStatus[call.status as keyof typeof messages.callStatus]?.ka || call.status,
+        statusEn: messages.callStatus[call.status as keyof typeof messages.callStatus]?.en || call.status,
       }));
       res.json({ data: callsWithStatus, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callsNotFound", locale),
         errorKa: messages.errors.callsNotFound.ka,
         errorEn: messages.errors.callsNotFound.en,
@@ -274,15 +253,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locale = getLocale(req.headers["accept-language"]);
     try {
       const call = await storage.createCall(req.body);
-      res.status(201).json({
-        data: call,
+      res.status(201).json({ 
+        data: call, 
         locale,
         message: getSuccess("callCreated", locale),
         messageKa: messages.success.callCreated.ka,
         messageEn: messages.success.callCreated.en,
       });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callCreateFailed", locale),
         errorKa: messages.errors.callCreateFailed.ka,
         errorEn: messages.errors.callCreateFailed.en,
@@ -296,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const call = await storage.updateCall(req.params.id, req.body);
       if (!call) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
@@ -305,16 +284,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const callWithStatus = {
         ...call,
-        statusKa:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.ka || call.status,
-        statusEn:
-          messages.callStatus[call.status as keyof typeof messages.callStatus]
-            ?.en || call.status,
+        statusKa: messages.callStatus[call.status as keyof typeof messages.callStatus]?.ka || call.status,
+        statusEn: messages.callStatus[call.status as keyof typeof messages.callStatus]?.en || call.status,
       };
       res.json({ data: callWithStatus, locale });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callUpdateFailed", locale),
         errorKa: messages.errors.callUpdateFailed.ka,
         errorEn: messages.errors.callUpdateFailed.en,
@@ -329,22 +304,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { rating, comment } = req.body;
       const call = await storage.rateCall(req.params.id, rating, comment);
       if (!call) {
-        return res.status(404).json({
+        return res.status(404).json({ 
           error: getError("callNotFound", locale),
           errorKa: messages.errors.callNotFound.ka,
           errorEn: messages.errors.callNotFound.en,
           locale,
         });
       }
-      res.json({
-        data: call,
+      res.json({ 
+        data: call, 
         locale,
         message: getSuccess("callRated", locale),
         messageKa: messages.success.callRated.ka,
         messageEn: messages.success.callRated.en,
       });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("callRateFailed", locale),
         errorKa: messages.errors.callRateFailed.ka,
         errorEn: messages.errors.callRateFailed.en,
@@ -357,16 +332,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const locale = getLocale(req.headers["accept-language"]);
     try {
       const translators = await storage.getOnlineTranslators();
-      res.json({
-        data: {
+      res.json({ 
+        data: { 
           count: translators.length,
           labelKa: `${translators.length} თარჯიმანი ონლაინ`,
-          labelEn: `${translators.length} translator${translators.length !== 1 ? "s" : ""} online`,
+          labelEn: `${translators.length} translator${translators.length !== 1 ? 's' : ''} online`,
         },
         locale,
       });
-    } catch {
-      res.status(500).json({
+    } catch (error) {
+      res.status(500).json({ 
         error: getError("onlineCountFailed", locale),
         errorKa: messages.errors.onlineCountFailed.ka,
         errorEn: messages.errors.onlineCountFailed.en,

@@ -4,11 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing, Typography, Shadows } from "@/constants/theme";
-import {
-  Translator,
-  getLanguageName,
-  getCategoryById,
-} from "@/constants/mockData";
+import { Translator, getLanguageName, getCategoryById } from "@/constants/mockData";
 
 interface TranslatorCardProps {
   translator: Translator;
@@ -36,12 +32,7 @@ export function TranslatorCard({ translator, onPress }: TranslatorCardProps) {
       onPress={onPress}
     >
       <View style={styles.header}>
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: theme.backgroundSecondary },
-          ]}
-        >
+        <View style={[styles.avatar, { backgroundColor: theme.backgroundSecondary }]}>
           <Feather name="user" size={24} color={theme.textSecondary} />
         </View>
         <View style={styles.headerInfo}>
@@ -50,19 +41,13 @@ export function TranslatorCard({ translator, onPress }: TranslatorCardProps) {
             <View
               style={[
                 styles.statusDot,
-                {
-                  backgroundColor: translator.isOnline
-                    ? theme.online
-                    : theme.offline,
-                },
+                { backgroundColor: translator.isOnline ? theme.online : theme.offline },
               ]}
             />
           </View>
           <View style={styles.ratingRow}>
             <Feather name="star" size={14} color="#F59E0B" />
-            <ThemedText style={styles.rating}>
-              {translator.rating.toFixed(1)}
-            </ThemedText>
+            <ThemedText style={styles.rating}>{translator.rating.toFixed(1)}</ThemedText>
             <ThemedText style={[styles.calls, { color: theme.textSecondary }]}>
               ({translator.totalCalls} calls)
             </ThemedText>
@@ -71,16 +56,8 @@ export function TranslatorCard({ translator, onPress }: TranslatorCardProps) {
       </View>
 
       <View style={styles.languages}>
-        <Feather
-          name="globe"
-          size={14}
-          color={theme.textSecondary}
-          style={styles.langIcon}
-        />
-        <ThemedText
-          style={[styles.langText, { color: theme.textSecondary }]}
-          numberOfLines={1}
-        >
+        <Feather name="globe" size={14} color={theme.textSecondary} style={styles.langIcon} />
+        <ThemedText style={[styles.langText, { color: theme.textSecondary }]} numberOfLines={1}>
           {languagePairs}
         </ThemedText>
       </View>
@@ -91,14 +68,9 @@ export function TranslatorCard({ translator, onPress }: TranslatorCardProps) {
           return cat ? (
             <View
               key={catId}
-              style={[
-                styles.categoryBadge,
-                { backgroundColor: theme.backgroundSecondary },
-              ]}
+              style={[styles.categoryBadge, { backgroundColor: theme.backgroundSecondary }]}
             >
-              <ThemedText
-                style={[styles.categoryText, { color: theme.textSecondary }]}
-              >
+              <ThemedText style={[styles.categoryText, { color: theme.textSecondary }]}>
                 {cat.nameEn}
               </ThemedText>
             </View>

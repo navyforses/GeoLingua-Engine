@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -33,30 +33,22 @@ export default function HomeScreen() {
   const [fromLang, setFromLang] = useState("ka");
   const [toLang, setToLang] = useState("en");
   const [selectedCategory, setSelectedCategory] = useState("general");
-  const [requestType, setRequestType] = useState<"instant" | "scheduled">(
-    "instant",
-  );
+  const [requestType, setRequestType] = useState<"instant" | "scheduled">("instant");
 
   const { data: categoriesData } = useQuery<{ data: Category[] } | Category[]>({
     queryKey: ["/api/categories"],
     staleTime: 1000 * 60 * 5,
   });
 
-  const { data: onlineData } = useQuery<{
-    data: { count: number; labelKa: string; labelEn: string };
-  }>({
+  const { data: onlineData } = useQuery<{ data: { count: number; labelKa: string; labelEn: string } }>({
     queryKey: ["/api/stats/online-count"],
     staleTime: 1000 * 30,
     refetchInterval: 30000,
   });
 
-  const categories = Array.isArray(categoriesData)
-    ? categoriesData
-    : categoriesData?.data || fallbackCategories;
+  const categories = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data || fallbackCategories);
   const onlineCount = onlineData?.data?.count ?? 0;
-  const selectedCategoryData = categories.find(
-    (c) => c.id === selectedCategory,
-  );
+  const selectedCategoryData = categories.find((c) => c.id === selectedCategory);
 
   const swapLanguages = () => {
     const temp = fromLang;
@@ -98,10 +90,7 @@ export default function HomeScreen() {
             onSelect={setFromLang}
           />
           <Pressable
-            style={[
-              styles.swapButton,
-              { backgroundColor: theme.backgroundSecondary },
-            ]}
+            style={[styles.swapButton, { backgroundColor: theme.backgroundSecondary }]}
             onPress={swapLanguages}
             hitSlop={10}
           >
@@ -114,9 +103,7 @@ export default function HomeScreen() {
           />
         </View>
 
-        <ThemedText
-          style={[styles.sectionLabel, { color: theme.textSecondary }]}
-        >
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
           Category
         </ThemedText>
         <View style={styles.categoriesContainer}>
@@ -130,32 +117,28 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        <ThemedText
-          style={[styles.sectionLabel, { color: theme.textSecondary }]}
-        >
+        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
           Request Type
         </ThemedText>
         <RequestTypeToggle value={requestType} onChange={setRequestType} />
 
         <View style={styles.pricePreview}>
           <View>
-            <ThemedText
-              style={[styles.priceLabel, { color: theme.textSecondary }]}
-            >
+            <ThemedText style={[styles.priceLabel, { color: theme.textSecondary }]}>
               Price
             </ThemedText>
             <ThemedText style={styles.priceValue}>
               {selectedCategoryData?.pricePerMinute || 2}₾
-              <ThemedText
-                style={[styles.priceUnit, { color: theme.textSecondary }]}
-              >
+              <ThemedText style={[styles.priceUnit, { color: theme.textSecondary }]}>
                 {" "}
                 / min
               </ThemedText>
             </ThemedText>
           </View>
           <View style={styles.aiOption}>
-            <Pressable style={[styles.aiButton, { borderColor: theme.accent }]}>
+            <Pressable
+              style={[styles.aiButton, { borderColor: theme.accent }]}
+            >
               <Feather name="cpu" size={16} color={theme.accent} />
               <ThemedText style={[styles.aiText, { color: theme.accent }]}>
                 AI: 0.5₾/min

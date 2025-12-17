@@ -14,13 +14,10 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
-import {
-  getLanguageName,
-  getCategoryById,
-  mockTranslators,
-} from "@/constants/mockData";
+import { getLanguageName, getCategoryById, mockTranslators } from "@/constants/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type RouteProps = RouteProp<RootStackParamList, "Matching">;
@@ -31,14 +28,12 @@ export default function MatchingScreen() {
   const { theme } = useTheme();
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
-
+  
   const { fromLang, toLang, category, type } = route.params;
   const categoryData = getCategoryById(category);
-
+  
   const [timeRemaining, setTimeRemaining] = useState(60);
-  const [broadcastCount] = useState(
-    mockTranslators.filter((t) => t.isOnline).length,
-  );
+  const [broadcastCount] = useState(mockTranslators.filter(t => t.isOnline).length);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const pulseScale = useSharedValue(1);
@@ -48,14 +43,14 @@ export default function MatchingScreen() {
     pulseScale.value = withRepeat(
       withTiming(1.5, { duration: 1500, easing: Easing.out(Easing.ease) }),
       -1,
-      false,
+      false
     );
     pulseOpacity.value = withRepeat(
       withTiming(0, { duration: 1500, easing: Easing.out(Easing.ease) }),
       -1,
-      false,
+      false
     );
-  }, [pulseScale, pulseOpacity]);
+  }, []);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -70,7 +65,7 @@ export default function MatchingScreen() {
 
     const matchTimeout = setTimeout(() => {
       if (navigation.canGoBack()) {
-        const translator = mockTranslators.find((t) => t.isOnline);
+        const translator = mockTranslators.find(t => t.isOnline);
         if (translator) {
           navigation.replace("Call", {
             translatorName: translator.name,
@@ -86,7 +81,7 @@ export default function MatchingScreen() {
       if (timerRef.current) clearInterval(timerRef.current);
       clearTimeout(matchTimeout);
     };
-  }, [category, categoryData?.pricePerMinute, navigation]);
+  }, []);
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],
@@ -99,9 +94,7 @@ export default function MatchingScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View
-        style={[styles.content, { paddingBottom: insets.bottom + Spacing.xl }]}
-      >
+      <View style={[styles.content, { paddingBottom: insets.bottom + Spacing.xl }]}>
         <View style={styles.matchingSection}>
           <View style={styles.pulseContainer}>
             <Animated.View
@@ -111,9 +104,7 @@ export default function MatchingScreen() {
                 pulseStyle,
               ]}
             />
-            <View
-              style={[styles.centerCircle, { backgroundColor: theme.primary }]}
-            >
+            <View style={[styles.centerCircle, { backgroundColor: theme.primary }]}>
               <Feather name="search" size={32} color="#fff" />
             </View>
           </View>
@@ -121,25 +112,13 @@ export default function MatchingScreen() {
           <ThemedText type="h3" style={styles.statusText}>
             Finding Translator...
           </ThemedText>
-
-          <ThemedText
-            style={[styles.broadcastText, { color: theme.textSecondary }]}
-          >
-            Broadcasted to {broadcastCount} translator
-            {broadcastCount !== 1 ? "s" : ""}
+          
+          <ThemedText style={[styles.broadcastText, { color: theme.textSecondary }]}>
+            Broadcasted to {broadcastCount} translator{broadcastCount !== 1 ? "s" : ""}
           </ThemedText>
 
-          <View
-            style={[
-              styles.timerContainer,
-              { backgroundColor: theme.backgroundSecondary },
-            ]}
-          >
-            <Feather
-              name="clock"
-              size={18}
-              color={timeRemaining < 15 ? theme.error : theme.text}
-            />
+          <View style={[styles.timerContainer, { backgroundColor: theme.backgroundSecondary }]}>
+            <Feather name="clock" size={18} color={timeRemaining < 15 ? theme.error : theme.text} />
             <ThemedText
               style={[
                 styles.timerText,
@@ -151,12 +130,7 @@ export default function MatchingScreen() {
           </View>
         </View>
 
-        <View
-          style={[
-            styles.detailsCard,
-            { backgroundColor: theme.backgroundDefault },
-          ]}
-        >
+        <View style={[styles.detailsCard, { backgroundColor: theme.backgroundDefault }]}>
           <View style={styles.detailRow}>
             <Feather name="globe" size={18} color={theme.textSecondary} />
             <ThemedText style={styles.detailText}>
@@ -164,22 +138,13 @@ export default function MatchingScreen() {
             </ThemedText>
           </View>
           <View style={styles.detailRow}>
-            <Feather
-              name={(categoryData?.icon as any) || "message-circle"}
-              size={18}
-              color={theme.textSecondary}
-            />
+            <Feather name={categoryData?.icon as any || "message-circle"} size={18} color={theme.textSecondary} />
             <ThemedText style={styles.detailText}>
-              {categoryData?.nameEn || "General"} -{" "}
-              {categoryData?.pricePerMinute || 2}₾/min
+              {categoryData?.nameEn || "General"} - {categoryData?.pricePerMinute || 2}₾/min
             </ThemedText>
           </View>
           <View style={styles.detailRow}>
-            <Feather
-              name={type === "instant" ? "zap" : "calendar"}
-              size={18}
-              color={theme.textSecondary}
-            />
+            <Feather name={type === "instant" ? "zap" : "calendar"} size={18} color={theme.textSecondary} />
             <ThemedText style={styles.detailText}>
               {type === "instant" ? "Instant Request" : "Scheduled Request"}
             </ThemedText>

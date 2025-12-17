@@ -12,11 +12,7 @@ import { Card } from "@/components/Card";
 import { StarRating } from "@/components/StarRating";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
-import {
-  mockTranslators,
-  getLanguageName,
-  getCategoryById,
-} from "@/constants/mockData";
+import { mockTranslators, getLanguageName, getCategoryById } from "@/constants/mockData";
 import { SearchStackParamList } from "@/navigation/SearchStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -28,10 +24,8 @@ export default function TranslatorDetailScreen() {
   const { theme } = useTheme();
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
-
-  const translator = mockTranslators.find(
-    (t) => t.id === route.params.translatorId,
-  );
+  
+  const translator = mockTranslators.find((t) => t.id === route.params.translatorId);
 
   if (!translator) {
     return (
@@ -42,8 +36,9 @@ export default function TranslatorDetailScreen() {
   }
 
   const handleRequestCall = () => {
+    const firstLanguage = translator.languages[0];
     const firstCategory = getCategoryById(translator.categories[0]);
-
+    
     navigation.navigate("Call", {
       translatorName: translator.name,
       translatorId: translator.id,
@@ -62,12 +57,7 @@ export default function TranslatorDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View
-            style={[
-              styles.avatar,
-              { backgroundColor: theme.backgroundSecondary },
-            ]}
-          >
+          <View style={[styles.avatar, { backgroundColor: theme.backgroundSecondary }]}>
             <Feather name="user" size={40} color={theme.textSecondary} />
           </View>
           <ThemedText type="h3" style={styles.name}>
@@ -77,25 +67,15 @@ export default function TranslatorDetailScreen() {
             <View
               style={[
                 styles.statusDot,
-                {
-                  backgroundColor: translator.isOnline
-                    ? theme.online
-                    : theme.offline,
-                },
+                { backgroundColor: translator.isOnline ? theme.online : theme.offline },
               ]}
             />
-            <ThemedText
-              style={[styles.statusText, { color: theme.textSecondary }]}
-            >
+            <ThemedText style={[styles.statusText, { color: theme.textSecondary }]}>
               {translator.isOnline ? "Online" : "Offline"}
             </ThemedText>
           </View>
           <View style={styles.ratingContainer}>
-            <StarRating
-              rating={Math.round(translator.rating)}
-              readonly
-              size={24}
-            />
+            <StarRating rating={Math.round(translator.rating)} readonly size={24} />
             <ThemedText style={styles.ratingText}>
               {translator.rating.toFixed(1)} ({translator.totalCalls} calls)
             </ThemedText>
@@ -135,19 +115,10 @@ export default function TranslatorDetailScreen() {
               return cat ? (
                 <View
                   key={catId}
-                  style={[
-                    styles.categoryBadge,
-                    { backgroundColor: theme.primary + "15" },
-                  ]}
+                  style={[styles.categoryBadge, { backgroundColor: theme.primary + "15" }]}
                 >
-                  <Feather
-                    name={cat.icon as any}
-                    size={14}
-                    color={theme.primary}
-                  />
-                  <ThemedText
-                    style={[styles.categoryText, { color: theme.primary }]}
-                  >
+                  <Feather name={cat.icon as any} size={14} color={theme.primary} />
+                  <ThemedText style={[styles.categoryText, { color: theme.primary }]}>
                     {cat.nameEn} - {cat.pricePerMinute}₾/min
                   </ThemedText>
                 </View>

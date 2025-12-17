@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  pgTable,
-  text,
-  varchar,
-  integer,
-  boolean,
-  real,
-  timestamp,
-  jsonb,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, real, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -37,9 +28,7 @@ export const translators = pgTable("translators", {
   totalMinutes: integer("total_minutes").default(0),
   isOnline: boolean("is_online").default(false),
   isVerified: boolean("is_verified").default(false),
-  languages: jsonb("languages")
-    .$type<{ from: string; to: string }[]>()
-    .default([]),
+  languages: jsonb("languages").$type<{ from: string; to: string }[]>().default([]),
   categories: jsonb("categories").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });

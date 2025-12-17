@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -13,20 +13,21 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 type RouteProps = RouteProp<RootStackParamList, "Call">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+const { width, height } = Dimensions.get("window");
+
 export default function CallScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
-
-  const { translatorName, translatorId, category, pricePerMinute } =
-    route.params;
+  
+  const { translatorName, translatorId, category, pricePerMinute } = route.params;
   const categoryData = getCategoryById(category);
-
+  
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(true);
-
+  
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function CallScreen() {
   const handleEndCall = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     const totalPrice = Math.ceil(duration / 60) * pricePerMinute;
-
+    
     navigation.replace("Rating", {
       translatorName,
       translatorId,
@@ -58,9 +59,7 @@ export default function CallScreen() {
       <View style={[styles.remoteVideo, { backgroundColor: "#1a1a2e" }]}>
         <View style={styles.placeholderVideo}>
           <Feather name="user" size={64} color="rgba(255,255,255,0.3)" />
-          <ThemedText style={styles.placeholderText}>
-            {translatorName}
-          </ThemedText>
+          <ThemedText style={styles.placeholderText}>{translatorName}</ThemedText>
         </View>
       </View>
 
@@ -73,9 +72,7 @@ export default function CallScreen() {
       <View style={[styles.timerContainer, { top: insets.top + Spacing.lg }]}>
         <View style={styles.timerBadge}>
           <View style={styles.liveDot} />
-          <ThemedText style={styles.timerText}>
-            {formatDuration(duration)}
-          </ThemedText>
+          <ThemedText style={styles.timerText}>{formatDuration(duration)}</ThemedText>
         </View>
       </View>
 
@@ -86,32 +83,16 @@ export default function CallScreen() {
         >
           <View style={styles.infoHeader}>
             <ThemedText style={styles.infoName}>{translatorName}</ThemedText>
-            <Feather
-              name="chevron-up"
-              size={18}
-              color="rgba(255,255,255,0.7)"
-            />
+            <Feather name="chevron-up" size={18} color="rgba(255,255,255,0.7)" />
           </View>
           <View style={styles.infoDetails}>
             <View style={styles.infoItem}>
-              <Feather
-                name={(categoryData?.icon as any) || "message-circle"}
-                size={14}
-                color="rgba(255,255,255,0.7)"
-              />
-              <ThemedText style={styles.infoItemText}>
-                {categoryData?.nameEn || "General"}
-              </ThemedText>
+              <Feather name={categoryData?.icon as any || "message-circle"} size={14} color="rgba(255,255,255,0.7)" />
+              <ThemedText style={styles.infoItemText}>{categoryData?.nameEn || "General"}</ThemedText>
             </View>
             <View style={styles.infoItem}>
-              <Feather
-                name="dollar-sign"
-                size={14}
-                color="rgba(255,255,255,0.7)"
-              />
-              <ThemedText style={styles.infoItemText}>
-                {currentPrice.toFixed(2)}₾
-              </ThemedText>
+              <Feather name="dollar-sign" size={14} color="rgba(255,255,255,0.7)" />
+              <ThemedText style={styles.infoItemText}>{currentPrice.toFixed(2)}₾</ThemedText>
             </View>
           </View>
         </Pressable>
@@ -121,49 +102,29 @@ export default function CallScreen() {
           onPress={() => setIsInfoExpanded(true)}
         >
           <ThemedText style={styles.infoName}>{translatorName}</ThemedText>
-          <Feather
-            name="chevron-down"
-            size={18}
-            color="rgba(255,255,255,0.7)"
-          />
+          <Feather name="chevron-down" size={18} color="rgba(255,255,255,0.7)" />
         </Pressable>
       )}
 
-      <View
-        style={[styles.controls, { paddingBottom: insets.bottom + Spacing.xl }]}
-      >
+      <View style={[styles.controls, { paddingBottom: insets.bottom + Spacing.xl }]}>
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: isMuted ? "#fff" : "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: isMuted ? "#fff" : "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
           onPress={() => setIsMuted(!isMuted)}
         >
-          <Feather
-            name={isMuted ? "mic-off" : "mic"}
-            size={24}
-            color={isMuted ? "#000" : "#fff"}
-          />
+          <Feather name={isMuted ? "mic-off" : "mic"} size={24} color={isMuted ? "#000" : "#fff"} />
         </Pressable>
 
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: isCameraOff ? "#fff" : "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: isCameraOff ? "#fff" : "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
           onPress={() => setIsCameraOff(!isCameraOff)}
         >
-          <Feather
-            name={isCameraOff ? "video-off" : "video"}
-            size={24}
-            color={isCameraOff ? "#000" : "#fff"}
-          />
+          <Feather name={isCameraOff ? "video-off" : "video"} size={24} color={isCameraOff ? "#000" : "#fff"} />
         </Pressable>
 
         <Pressable
@@ -179,10 +140,7 @@ export default function CallScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <Feather name="repeat" size={24} color="#fff" />
@@ -191,10 +149,7 @@ export default function CallScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <Feather name="message-square" size={24} color="#fff" />
