@@ -25,7 +25,11 @@ const springConfig: WithSpringConfig = {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function FloatingActionButton({ icon, onPress, bottom }: FloatingActionButtonProps) {
+export function FloatingActionButton({
+  icon,
+  onPress,
+  bottom,
+}: FloatingActionButtonProps) {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
 

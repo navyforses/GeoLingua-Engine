@@ -36,7 +36,10 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <GestureHandlerRootView style={styles.root} onLayout={onLayoutRootView}>
+          <GestureHandlerRootView
+            style={styles.root}
+            onLayout={onLayoutRootView}
+          >
             <KeyboardProvider>
               <NavigationContainer>
                 <RootStackNavigator />

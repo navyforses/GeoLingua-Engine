@@ -13,11 +13,41 @@ const seedLanguages = [
 ];
 
 const seedCategories = [
-  { id: "general", name: "ზოგადი", nameEn: "General", icon: "message-circle", pricePerMinute: 2 },
-  { id: "administrative", name: "ადმინისტრაციული", nameEn: "Administrative", icon: "file-text", pricePerMinute: 2.5 },
-  { id: "business", name: "ბიზნესი", nameEn: "Business", icon: "briefcase", pricePerMinute: 3 },
-  { id: "medical", name: "სამედიცინო", nameEn: "Medical", icon: "heart", pricePerMinute: 4 },
-  { id: "legal", name: "იურიდიული", nameEn: "Legal", icon: "shield", pricePerMinute: 4 },
+  {
+    id: "general",
+    name: "ზოგადი",
+    nameEn: "General",
+    icon: "message-circle",
+    pricePerMinute: 2,
+  },
+  {
+    id: "administrative",
+    name: "ადმინისტრაციული",
+    nameEn: "Administrative",
+    icon: "file-text",
+    pricePerMinute: 2.5,
+  },
+  {
+    id: "business",
+    name: "ბიზნესი",
+    nameEn: "Business",
+    icon: "briefcase",
+    pricePerMinute: 3,
+  },
+  {
+    id: "medical",
+    name: "სამედიცინო",
+    nameEn: "Medical",
+    icon: "heart",
+    pricePerMinute: 4,
+  },
+  {
+    id: "legal",
+    name: "იურიდიული",
+    nameEn: "Legal",
+    icon: "shield",
+    pricePerMinute: 4,
+  },
 ];
 
 const seedTranslators = [

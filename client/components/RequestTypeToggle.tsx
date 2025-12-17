@@ -14,7 +14,9 @@ export function RequestTypeToggle({ value, onChange }: RequestTypeToggleProps) {
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}
+    >
       <Pressable
         style={[
           styles.option,
