@@ -154,7 +154,7 @@ export default function ProfileScreen() {
         <MenuItem
           icon="credit-card"
           label="Payment Methods"
-          onPress={() => {}}
+          onPress={() => navigation.navigate("PaymentMethods")}
         />
         <MenuItem
           icon="bell"
