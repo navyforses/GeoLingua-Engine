@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
@@ -10,6 +10,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { ThemedText } from "@/components/ThemedText";
 import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ProfileStackParamList } from "@/navigation/ProfileStackNavigator";
 
@@ -20,6 +21,7 @@ interface MenuItemProps {
   label: string;
   onPress: () => void;
   showBadge?: boolean;
+  badgeCount?: number;
   textColor?: string;
 }
 
@@ -28,6 +30,7 @@ function MenuItem({
   label,
   onPress,
   showBadge,
+  badgeCount = 3,
   textColor,
 }: MenuItemProps) {
   const { theme } = useTheme();
@@ -49,7 +52,7 @@ function MenuItem({
       <View style={styles.menuRight}>
         {showBadge ? (
           <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-            <ThemedText style={styles.badgeText}>3</ThemedText>
+            <ThemedText style={styles.badgeText}>{badgeCount}</ThemedText>
           </View>
         ) : null}
         <Feather name="chevron-right" size={20} color={theme.textSecondary} />
@@ -63,6 +66,30 @@ export default function ProfileScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
+  const { user, signOut } = useAuth();
+
+  const userName = user?.user_metadata?.name || "User";
+  const userEmail = user?.email || "";
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const handleSignOut = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await signOut();
+          if (error) {
+            Alert.alert("Error", "Failed to sign out. Please try again.");
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <KeyboardAwareScrollViewCompat
@@ -74,18 +101,13 @@ export default function ProfileScreen() {
       scrollIndicatorInsets={{ bottom: insets.bottom }}
     >
       <View style={styles.header}>
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: theme.backgroundSecondary },
-          ]}
-        >
-          <Feather name="user" size={32} color={theme.textSecondary} />
+        <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+          <ThemedText style={styles.avatarText}>{userInitial}</ThemedText>
         </View>
         <View style={styles.headerInfo}>
-          <ThemedText type="h4">Guest User</ThemedText>
+          <ThemedText type="h4">{userName}</ThemedText>
           <ThemedText style={[styles.email, { color: theme.textSecondary }]}>
-            Sign in to access all features
+            {userEmail}
           </ThemedText>
         </View>
         <Pressable style={[styles.editButton, { borderColor: theme.border }]}>
@@ -139,6 +161,7 @@ export default function ProfileScreen() {
           label="Notifications"
           onPress={() => {}}
           showBadge
+          badgeCount={3}
         />
         <MenuItem
           icon="globe"
@@ -170,10 +193,14 @@ export default function ProfileScreen() {
         <MenuItem
           icon="log-out"
           label="Sign Out"
-          onPress={() => {}}
+          onPress={handleSignOut}
           textColor={theme.error}
         />
       </Card>
+
+      <ThemedText style={[styles.version, { color: theme.textSecondary }]}>
+        GeoLingua v1.0.0
+      </ThemedText>
     </KeyboardAwareScrollViewCompat>
   );
 }
@@ -194,6 +221,11 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
   },
   headerInfo: {
     flex: 1,
@@ -263,5 +295,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontWeight: "600",
+  },
+  version: {
+    ...Typography.small,
+    textAlign: "center",
+    marginTop: Spacing.md,
   },
 });
