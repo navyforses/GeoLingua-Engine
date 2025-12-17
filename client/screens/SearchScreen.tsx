@@ -1,5 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { View, StyleSheet, FlatList, TextInput, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -39,13 +45,17 @@ export default function SearchScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: translatorsData, isLoading } = useQuery<{ data: ApiTranslator[] } | ApiTranslator[]>({
+  const { data: translatorsData, isLoading } = useQuery<
+    { data: ApiTranslator[] } | ApiTranslator[]
+  >({
     queryKey: ["/api/translators"],
     staleTime: 1000 * 60 * 2,
   });
 
   const translators: Translator[] = useMemo(() => {
-    const rawData = Array.isArray(translatorsData) ? translatorsData : translatorsData?.data;
+    const rawData = Array.isArray(translatorsData)
+      ? translatorsData
+      : translatorsData?.data;
     if (rawData) {
       return rawData.map((t) => ({
         id: t.id,
@@ -63,7 +73,7 @@ export default function SearchScreen() {
   }, [translatorsData]);
 
   const filteredTranslators = translators.filter((translator) =>
-    translator.name.toLowerCase().includes(searchQuery.toLowerCase())
+    translator.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const onlineFirst = [...filteredTranslators].sort((a, b) => {
@@ -75,7 +85,9 @@ export default function SearchScreen() {
   const renderItem = ({ item }: { item: Translator }) => (
     <TranslatorCard
       translator={item}
-      onPress={() => navigation.navigate("TranslatorDetail", { translatorId: item.id })}
+      onPress={() =>
+        navigation.navigate("TranslatorDetail", { translatorId: item.id })
+      }
     />
   );
 
@@ -84,7 +96,12 @@ export default function SearchScreen() {
       return (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
-          <ThemedText style={[styles.emptyText, { color: theme.textSecondary, marginTop: Spacing.lg }]}>
+          <ThemedText
+            style={[
+              styles.emptyText,
+              { color: theme.textSecondary, marginTop: Spacing.lg },
+            ]}
+          >
             Loading translators...
           </ThemedText>
         </View>
@@ -105,11 +122,19 @@ export default function SearchScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundDefault }]}>
+      <View
+        style={[
+          styles.searchContainer,
+          { backgroundColor: theme.backgroundDefault },
+        ]}
+      >
         <View
           style={[
             styles.searchBox,
-            { backgroundColor: theme.backgroundSecondary, borderColor: theme.border },
+            {
+              backgroundColor: theme.backgroundSecondary,
+              borderColor: theme.border,
+            },
           ]}
         >
           <Feather name="search" size={20} color={theme.textSecondary} />

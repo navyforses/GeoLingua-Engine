@@ -23,9 +23,9 @@ export default function RatingScreen() {
   const { theme } = useTheme();
   const route = useRoute<RouteProps>();
   const navigation = useNavigation();
-  
+
   const { translatorName, duration, totalPrice } = route.params;
-  
+
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -48,11 +48,19 @@ export default function RatingScreen() {
       <KeyboardAwareScrollViewCompat
         contentContainerStyle={[
           styles.content,
-          { paddingTop: headerHeight + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl },
+          {
+            paddingTop: headerHeight + Spacing.xl,
+            paddingBottom: insets.bottom + Spacing.xl,
+          },
         ]}
       >
         <View style={styles.header}>
-          <View style={[styles.checkCircle, { backgroundColor: theme.online + "20" }]}>
+          <View
+            style={[
+              styles.checkCircle,
+              { backgroundColor: theme.online + "20" },
+            ]}
+          >
             <Feather name="check" size={32} color={theme.online} />
           </View>
           <ThemedText type="h3" style={styles.title}>
@@ -63,19 +71,34 @@ export default function RatingScreen() {
           </ThemedText>
         </View>
 
-        <View style={[styles.summaryCard, { backgroundColor: theme.backgroundDefault }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: theme.backgroundDefault },
+          ]}
+        >
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Feather name="clock" size={20} color={theme.textSecondary} />
-              <ThemedText style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+              <ThemedText
+                style={[styles.summaryLabel, { color: theme.textSecondary }]}
+              >
                 Duration
               </ThemedText>
               <ThemedText type="h4">{formatDuration(duration)}</ThemedText>
             </View>
-            <View style={[styles.summaryDivider, { backgroundColor: theme.border }]} />
+            <View
+              style={[styles.summaryDivider, { backgroundColor: theme.border }]}
+            />
             <View style={styles.summaryItem}>
-              <Feather name="credit-card" size={20} color={theme.textSecondary} />
-              <ThemedText style={[styles.summaryLabel, { color: theme.textSecondary }]}>
+              <Feather
+                name="credit-card"
+                size={20}
+                color={theme.textSecondary}
+              />
+              <ThemedText
+                style={[styles.summaryLabel, { color: theme.textSecondary }]}
+              >
                 Total
               </ThemedText>
               <ThemedText type="h4" style={{ color: theme.primary }}>
@@ -93,7 +116,9 @@ export default function RatingScreen() {
         </View>
 
         <View style={styles.commentSection}>
-          <ThemedText style={[styles.commentLabel, { color: theme.textSecondary }]}>
+          <ThemedText
+            style={[styles.commentLabel, { color: theme.textSecondary }]}
+          >
             Leave a comment (optional)
           </ThemedText>
           <TextInput
@@ -124,7 +149,10 @@ export default function RatingScreen() {
         </Button>
 
         <Pressable
-          style={({ pressed }) => [styles.skipButton, { opacity: pressed ? 0.7 : 1 }]}
+          style={({ pressed }) => [
+            styles.skipButton,
+            { opacity: pressed ? 0.7 : 1 },
+          ]}
           onPress={handleSkip}
         >
           <ThemedText style={[styles.skipText, { color: theme.textSecondary }]}>

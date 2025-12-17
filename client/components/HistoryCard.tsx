@@ -4,7 +4,13 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing, Typography, Shadows } from "@/constants/theme";
-import { CallHistory, getLanguageName, getCategoryById, formatDuration, formatPrice } from "@/constants/mockData";
+import {
+  CallHistory,
+  getLanguageName,
+  getCategoryById,
+  formatDuration,
+  formatPrice,
+} from "@/constants/mockData";
 
 interface HistoryCardProps {
   call: CallHistory;
@@ -17,7 +23,9 @@ export function HistoryCard({ call, onPress }: HistoryCardProps) {
 
   const formatDate = (date: Date) => {
     const now = new Date();
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    );
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -33,13 +41,21 @@ export function HistoryCard({ call, onPress }: HistoryCardProps) {
     <Pressable
       style={({ pressed }) => [
         styles.container,
-        { backgroundColor: theme.backgroundDefault, opacity: pressed ? 0.9 : 1 },
+        {
+          backgroundColor: theme.backgroundDefault,
+          opacity: pressed ? 0.9 : 1,
+        },
         Shadows.card,
       ]}
       onPress={onPress}
     >
       <View style={styles.header}>
-        <View style={[styles.avatar, { backgroundColor: theme.backgroundSecondary }]}>
+        <View
+          style={[
+            styles.avatar,
+            { backgroundColor: theme.backgroundSecondary },
+          ]}
+        >
           <Feather name="user" size={20} color={theme.textSecondary} />
         </View>
         <View style={styles.headerInfo}>
@@ -49,9 +65,14 @@ export function HistoryCard({ call, onPress }: HistoryCardProps) {
           </ThemedText>
         </View>
         <View
-          style={[styles.statusBadge, { backgroundColor: statusColors[call.status] + "20" }]}
+          style={[
+            styles.statusBadge,
+            { backgroundColor: statusColors[call.status] + "20" },
+          ]}
         >
-          <ThemedText style={[styles.statusText, { color: statusColors[call.status] }]}>
+          <ThemedText
+            style={[styles.statusText, { color: statusColors[call.status] }]}
+          >
             {call.status.charAt(0).toUpperCase() + call.status.slice(1)}
           </ThemedText>
         </View>
@@ -60,14 +81,22 @@ export function HistoryCard({ call, onPress }: HistoryCardProps) {
       <View style={styles.details}>
         <View style={styles.detailItem}>
           <Feather name="globe" size={14} color={theme.textSecondary} />
-          <ThemedText style={[styles.detailText, { color: theme.textSecondary }]}>
+          <ThemedText
+            style={[styles.detailText, { color: theme.textSecondary }]}
+          >
             {getLanguageName(call.fromLang)} - {getLanguageName(call.toLang)}
           </ThemedText>
         </View>
         {category ? (
           <View style={styles.detailItem}>
-            <Feather name={category.icon as any} size={14} color={theme.textSecondary} />
-            <ThemedText style={[styles.detailText, { color: theme.textSecondary }]}>
+            <Feather
+              name={category.icon as any}
+              size={14}
+              color={theme.textSecondary}
+            />
+            <ThemedText
+              style={[styles.detailText, { color: theme.textSecondary }]}
+            >
               {category.nameEn}
             </ThemedText>
           </View>
@@ -78,7 +107,9 @@ export function HistoryCard({ call, onPress }: HistoryCardProps) {
         <View style={styles.footer}>
           <View style={styles.footerItem}>
             <Feather name="clock" size={14} color={theme.text} />
-            <ThemedText style={styles.footerValue}>{formatDuration(call.duration)}</ThemedText>
+            <ThemedText style={styles.footerValue}>
+              {formatDuration(call.duration)}
+            </ThemedText>
           </View>
           <View style={styles.footerItem}>
             <ThemedText style={[styles.footerValue, { color: theme.primary }]}>

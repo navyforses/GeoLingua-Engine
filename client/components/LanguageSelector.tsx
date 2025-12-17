@@ -12,10 +12,14 @@ interface LanguageSelectorProps {
   onSelect: (code: string) => void;
 }
 
-export function LanguageSelector({ label, selectedCode, onSelect }: LanguageSelectorProps) {
+export function LanguageSelector({
+  label,
+  selectedCode,
+  onSelect,
+}: LanguageSelectorProps) {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = React.useState(false);
-  
+
   const selectedLanguage = languages.find((l) => l.code === selectedCode);
 
   const handleSelect = (code: string) => {
@@ -27,20 +31,31 @@ export function LanguageSelector({ label, selectedCode, onSelect }: LanguageSele
     <Pressable
       style={({ pressed }) => [
         styles.languageItem,
-        { 
-          backgroundColor: pressed ? theme.backgroundSecondary : theme.backgroundDefault,
+        {
+          backgroundColor: pressed
+            ? theme.backgroundSecondary
+            : theme.backgroundDefault,
           borderBottomColor: theme.border,
         },
-        item.code === selectedCode && { backgroundColor: theme.backgroundSecondary },
+        item.code === selectedCode && {
+          backgroundColor: theme.backgroundSecondary,
+        },
       ]}
       onPress={() => handleSelect(item.code)}
     >
       <ThemedText style={styles.languageName}>{item.nameEn}</ThemedText>
-      <ThemedText style={[styles.languageNative, { color: theme.textSecondary }]}>
+      <ThemedText
+        style={[styles.languageNative, { color: theme.textSecondary }]}
+      >
         {item.name}
       </ThemedText>
       {item.code === selectedCode ? (
-        <Feather name="check" size={20} color={theme.primary} style={styles.checkIcon} />
+        <Feather
+          name="check"
+          size={20}
+          color={theme.primary}
+          style={styles.checkIcon}
+        />
       ) : null}
     </Pressable>
   );
@@ -48,12 +63,16 @@ export function LanguageSelector({ label, selectedCode, onSelect }: LanguageSele
   return (
     <>
       <View style={styles.container}>
-        <ThemedText style={[styles.label, { color: theme.textSecondary }]}>{label}</ThemedText>
+        <ThemedText style={[styles.label, { color: theme.textSecondary }]}>
+          {label}
+        </ThemedText>
         <Pressable
           style={({ pressed }) => [
             styles.selector,
             {
-              backgroundColor: pressed ? theme.backgroundSecondary : theme.backgroundDefault,
+              backgroundColor: pressed
+                ? theme.backgroundSecondary
+                : theme.backgroundDefault,
               borderColor: theme.border,
             },
           ]}
@@ -72,8 +91,15 @@ export function LanguageSelector({ label, selectedCode, onSelect }: LanguageSele
         presentationStyle="pageSheet"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { backgroundColor: theme.backgroundRoot }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+        <View
+          style={[
+            styles.modalContainer,
+            { backgroundColor: theme.backgroundRoot },
+          ]}
+        >
+          <View
+            style={[styles.modalHeader, { borderBottomColor: theme.border }]}
+          >
             <ThemedText type="h4">Select Language</ThemedText>
             <Pressable onPress={() => setModalVisible(false)} hitSlop={10}>
               <Feather name="x" size={24} color={theme.text} />

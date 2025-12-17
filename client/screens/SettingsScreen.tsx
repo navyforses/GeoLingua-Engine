@@ -18,17 +18,31 @@ interface SettingItemProps {
   onPress?: () => void;
 }
 
-function SettingItem({ icon, label, description, value, onValueChange, onPress }: SettingItemProps) {
+function SettingItem({
+  icon,
+  label,
+  description,
+  value,
+  onValueChange,
+  onPress,
+}: SettingItemProps) {
   const { theme } = useTheme();
   const isToggle = value !== undefined && onValueChange !== undefined;
 
   const content = (
     <View style={styles.settingItem}>
-      <Feather name={icon} size={20} color={theme.primary} style={styles.settingIcon} />
+      <Feather
+        name={icon}
+        size={20}
+        color={theme.primary}
+        style={styles.settingIcon}
+      />
       <View style={styles.settingInfo}>
         <ThemedText style={styles.settingLabel}>{label}</ThemedText>
         {description ? (
-          <ThemedText style={[styles.settingDescription, { color: theme.textSecondary }]}>
+          <ThemedText
+            style={[styles.settingDescription, { color: theme.textSecondary }]}
+          >
             {description}
           </ThemedText>
         ) : null}
@@ -76,7 +90,9 @@ export default function SettingsScreen() {
         { paddingBottom: insets.bottom + Spacing.xl },
       ]}
     >
-      <ThemedText style={[styles.sectionHeader, { color: theme.textSecondary }]}>
+      <ThemedText
+        style={[styles.sectionHeader, { color: theme.textSecondary }]}
+      >
         NOTIFICATIONS
       </ThemedText>
       <Card elevation={1} style={styles.card}>
@@ -105,7 +121,9 @@ export default function SettingsScreen() {
         />
       </Card>
 
-      <ThemedText style={[styles.sectionHeader, { color: theme.textSecondary }]}>
+      <ThemedText
+        style={[styles.sectionHeader, { color: theme.textSecondary }]}
+      >
         CALLS
       </ThemedText>
       <Card elevation={1} style={styles.card}>
@@ -118,15 +136,13 @@ export default function SettingsScreen() {
         />
       </Card>
 
-      <ThemedText style={[styles.sectionHeader, { color: theme.textSecondary }]}>
+      <ThemedText
+        style={[styles.sectionHeader, { color: theme.textSecondary }]}
+      >
         ABOUT
       </ThemedText>
       <Card elevation={1} style={styles.card}>
-        <SettingItem
-          icon="info"
-          label="App Version"
-          description="1.0.0"
-        />
+        <SettingItem icon="info" label="App Version" description="1.0.0" />
         <View style={[styles.divider, { backgroundColor: theme.border }]} />
         <SettingItem
           icon="github"
@@ -135,15 +151,13 @@ export default function SettingsScreen() {
         />
       </Card>
 
-      <ThemedText style={[styles.sectionHeader, { color: theme.textSecondary }]}>
+      <ThemedText
+        style={[styles.sectionHeader, { color: theme.textSecondary }]}
+      >
         DANGER ZONE
       </ThemedText>
       <Card elevation={1} style={styles.card}>
-        <SettingItem
-          icon="trash-2"
-          label="Delete Account"
-          onPress={() => {}}
-        />
+        <SettingItem icon="trash-2" label="Delete Account" onPress={() => {}} />
       </Card>
     </KeyboardAwareScrollViewCompat>
   );

@@ -10,7 +10,12 @@ interface StarRatingProps {
   readonly?: boolean;
 }
 
-export function StarRating({ rating, onRatingChange, size = 32, readonly = false }: StarRatingProps) {
+export function StarRating({
+  rating,
+  onRatingChange,
+  size = 32,
+  readonly = false,
+}: StarRatingProps) {
   return (
     <View style={styles.container}>
       {Array.from({ length: 5 }).map((_, i) => (
