@@ -19,6 +19,7 @@ export type RootStackParamList = {
     translatorId: string;
     category: string;
     pricePerMinute: number;
+    roomId?: string;
   };
   Rating: {
     translatorName: string;
