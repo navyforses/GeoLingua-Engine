@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { getLanguageName, getCategoryById } from "@/constants/mockData";
@@ -57,14 +58,14 @@ export default function MatchingScreen() {
     pulseScale.value = withRepeat(
       withTiming(1.5, { duration: 1500, easing: Easing.out(Easing.ease) }),
       -1,
-      false,
+      false
     );
     pulseOpacity.value = withRepeat(
       withTiming(0, { duration: 1500, easing: Easing.out(Easing.ease) }),
       -1,
-      false,
+      false
     );
-  }, [pulseScale, pulseOpacity]);
+  }, []);
 
   // Start matching when screen mounts
   useEffect(() => {
@@ -148,9 +149,7 @@ export default function MatchingScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View
-        style={[styles.content, { paddingBottom: insets.bottom + Spacing.xl }]}
-      >
+      <View style={[styles.content, { paddingBottom: insets.bottom + Spacing.xl }]}>
         <View style={styles.matchingSection}>
           <View style={styles.pulseContainer}>
             {!hasError && timeRemaining > 0 && (
@@ -213,12 +212,7 @@ export default function MatchingScreen() {
           )}
         </View>
 
-        <View
-          style={[
-            styles.detailsCard,
-            { backgroundColor: theme.backgroundDefault },
-          ]}
-        >
+        <View style={[styles.detailsCard, { backgroundColor: theme.backgroundDefault }]}>
           <View style={styles.detailRow}>
             <Feather name="globe" size={18} color={theme.textSecondary} />
             <ThemedText style={styles.detailText}>
@@ -235,16 +229,11 @@ export default function MatchingScreen() {
               color={theme.textSecondary}
             />
             <ThemedText style={styles.detailText}>
-              {categoryData?.nameEn || "General"} -{" "}
-              {categoryData?.pricePerMinute || 2}₾/min
+              {categoryData?.nameEn || "General"} - {categoryData?.pricePerMinute || 2}₾/min
             </ThemedText>
           </View>
           <View style={styles.detailRow}>
-            <Feather
-              name={type === "instant" ? "zap" : "calendar"}
-              size={18}
-              color={theme.textSecondary}
-            />
+            <Feather name={type === "instant" ? "zap" : "calendar"} size={18} color={theme.textSecondary} />
             <ThemedText style={styles.detailText}>
               {type === "instant" ? "Instant Request" : "Scheduled Request"}
             </ThemedText>

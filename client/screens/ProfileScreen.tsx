@@ -39,9 +39,7 @@ function MenuItem({
     <Pressable
       style={({ pressed }) => [
         styles.menuItem,
-        {
-          backgroundColor: pressed ? theme.backgroundSecondary : "transparent",
-        },
+        { backgroundColor: pressed ? theme.backgroundSecondary : "transparent" },
       ]}
       onPress={onPress}
     >
@@ -110,7 +108,9 @@ export default function ProfileScreen() {
             {userEmail}
           </ThemedText>
         </View>
-        <Pressable style={[styles.editButton, { borderColor: theme.border }]}>
+        <Pressable
+          style={[styles.editButton, { borderColor: theme.border }]}
+        >
           <Feather name="edit-2" size={16} color={theme.text} />
         </Pressable>
       </View>
@@ -119,31 +119,21 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <ThemedText type="h3">0</ThemedText>
-            <ThemedText
-              style={[styles.statLabel, { color: theme.textSecondary }]}
-            >
+            <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
               Calls
             </ThemedText>
           </View>
-          <View
-            style={[styles.statDivider, { backgroundColor: theme.border }]}
-          />
+          <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
           <View style={styles.statItem}>
             <ThemedText type="h3">0</ThemedText>
-            <ThemedText
-              style={[styles.statLabel, { color: theme.textSecondary }]}
-            >
+            <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
               Minutes
             </ThemedText>
           </View>
-          <View
-            style={[styles.statDivider, { backgroundColor: theme.border }]}
-          />
+          <View style={[styles.statDivider, { backgroundColor: theme.border }]} />
           <View style={styles.statItem}>
             <ThemedText type="h3">0₾</ThemedText>
-            <ThemedText
-              style={[styles.statLabel, { color: theme.textSecondary }]}
-            >
+            <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
               Spent
             </ThemedText>
           </View>
@@ -186,7 +176,11 @@ export default function ProfileScreen() {
           label="Terms of Service"
           onPress={() => {}}
         />
-        <MenuItem icon="shield" label="Privacy Policy" onPress={() => {}} />
+        <MenuItem
+          icon="shield"
+          label="Privacy Policy"
+          onPress={() => {}}
+        />
       </Card>
 
       <Card elevation={1} style={styles.menuCard}>

@@ -118,7 +118,7 @@ export function getLocale(acceptLanguage?: string): SupportedLanguage {
 export function t(
   key: keyof typeof messages.errors | keyof typeof messages.success,
   type: "errors" | "success",
-  locale: SupportedLanguage,
+  locale: SupportedLanguage
 ): string {
   const group = messages[type] as Record<string, { ka: string; en: string }>;
   return group[key]?.[locale] || group[key]?.en || key;
@@ -126,7 +126,7 @@ export function t(
 
 export function formatBilingualResponse<T>(
   data: T,
-  locale: SupportedLanguage,
+  locale: SupportedLanguage
 ): { data: T; locale: SupportedLanguage } {
   return { data, locale };
 }

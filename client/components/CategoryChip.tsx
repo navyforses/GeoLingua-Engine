@@ -12,11 +12,7 @@ interface CategoryChipProps {
   onPress: () => void;
 }
 
-export function CategoryChip({
-  category,
-  isSelected,
-  onPress,
-}: CategoryChipProps) {
+export function CategoryChip({ category, isSelected, onPress }: CategoryChipProps) {
   const { theme } = useTheme();
 
   return (
@@ -38,7 +34,10 @@ export function CategoryChip({
         style={styles.icon}
       />
       <ThemedText
-        style={[styles.text, { color: isSelected ? "#fff" : theme.text }]}
+        style={[
+          styles.text,
+          { color: isSelected ? "#fff" : theme.text },
+        ]}
       >
         {category.nameEn}
       </ThemedText>

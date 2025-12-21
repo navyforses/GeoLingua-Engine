@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -14,6 +14,8 @@ import { useCall } from "@/hooks/useCall";
 
 type RouteProps = RouteProp<RootStackParamList, "Call">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const { width, height } = Dimensions.get("window");
 
 export default function CallScreen() {
   const insets = useSafeAreaInsets();
@@ -129,11 +131,7 @@ export default function CallScreen() {
         >
           <View style={styles.infoHeader}>
             <ThemedText style={styles.infoName}>{translatorName}</ThemedText>
-            <Feather
-              name="chevron-up"
-              size={18}
-              color="rgba(255,255,255,0.7)"
-            />
+            <Feather name="chevron-up" size={18} color="rgba(255,255,255,0.7)" />
           </View>
           <View style={styles.infoDetails}>
             <View style={styles.infoItem}>
@@ -150,14 +148,8 @@ export default function CallScreen() {
               </ThemedText>
             </View>
             <View style={styles.infoItem}>
-              <Feather
-                name="dollar-sign"
-                size={14}
-                color="rgba(255,255,255,0.7)"
-              />
-              <ThemedText style={styles.infoItemText}>
-                {currentPrice.toFixed(2)}₾
-              </ThemedText>
+              <Feather name="dollar-sign" size={14} color="rgba(255,255,255,0.7)" />
+              <ThemedText style={styles.infoItemText}>{currentPrice.toFixed(2)}₾</ThemedText>
             </View>
           </View>
         </Pressable>
@@ -167,11 +159,7 @@ export default function CallScreen() {
           onPress={() => setIsInfoExpanded(true)}
         >
           <ThemedText style={styles.infoName}>{translatorName}</ThemedText>
-          <Feather
-            name="chevron-down"
-            size={18}
-            color="rgba(255,255,255,0.7)"
-          />
+          <Feather name="chevron-down" size={18} color="rgba(255,255,255,0.7)" />
         </Pressable>
       )}
 
@@ -183,36 +171,22 @@ export default function CallScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: isMuted ? "#fff" : "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: isMuted ? "#fff" : "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
           onPress={toggleMute}
         >
-          <Feather
-            name={isMuted ? "mic-off" : "mic"}
-            size={24}
-            color={isMuted ? "#000" : "#fff"}
-          />
+          <Feather name={isMuted ? "mic-off" : "mic"} size={24} color={isMuted ? "#000" : "#fff"} />
         </Pressable>
 
         {/* Camera Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: isCameraOff ? "#fff" : "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: isCameraOff ? "#fff" : "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
           onPress={toggleCamera}
         >
-          <Feather
-            name={isCameraOff ? "video-off" : "video"}
-            size={24}
-            color={isCameraOff ? "#000" : "#fff"}
-          />
+          <Feather name={isCameraOff ? "video-off" : "video"} size={24} color={isCameraOff ? "#000" : "#fff"} />
         </Pressable>
 
         {/* End Call Button */}
@@ -230,10 +204,7 @@ export default function CallScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <Feather name="repeat" size={24} color="#fff" />
@@ -243,10 +214,7 @@ export default function CallScreen() {
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
-            {
-              backgroundColor: "rgba(255,255,255,0.2)",
-              opacity: pressed ? 0.8 : 1,
-            },
+            { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
         >
           <Feather name="message-square" size={24} color="#fff" />
