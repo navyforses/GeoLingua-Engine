@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Typography, Shadows } from "@/constants/theme";
 import { formatDuration, getCategoryById } from "@/constants/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useCall } from "@/hooks/useCall";
 
 type RouteProps = RouteProp<RootStackParamList, "Call">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -18,35 +20,56 @@ export default function CallScreen() {
   const route = useRoute<RouteProps>();
   const navigation = useNavigation<NavigationProp>();
 
-  const { translatorName, translatorId, category, pricePerMinute } =
+  const { translatorName, translatorId, category, pricePerMinute, roomId } =
     route.params;
   const categoryData = getCategoryById(category);
 
-  const [duration, setDuration] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
   const [isInfoExpanded, setIsInfoExpanded] = useState(true);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const {
+    duration,
+    isMuted,
+    isCameraOff,
+    toggleMute,
+    toggleCamera,
+    endCall,
+    startCall,
+    isConnected,
+  } = useCall();
 
+  // Start call when screen mounts
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setDuration((prev) => prev + 1);
-    }, 1000);
+    const initCall = async () => {
+      // Request camera permission
+      if (!cameraPermission?.granted) {
+        await requestCameraPermission();
+      }
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      // Start the call
+      if (roomId) {
+        await startCall({
+          roomId,
+          translatorName,
+          translatorId,
+          category,
+          pricePerMinute,
+        });
+      }
     };
+
+    initCall();
   }, []);
 
   const handleEndCall = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    const totalPrice = Math.ceil(duration / 60) * pricePerMinute;
+    const callDuration = endCall();
+    const totalPrice =
+      Math.ceil((callDuration || duration) / 60) * pricePerMinute;
 
     navigation.replace("Rating", {
       translatorName,
       translatorId,
-      duration,
+      duration: callDuration || duration,
       totalPrice: totalPrice || pricePerMinute,
     });
   };
@@ -55,30 +78,50 @@ export default function CallScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Remote Video (Translator) - Placeholder for now */}
       <View style={[styles.remoteVideo, { backgroundColor: "#1a1a2e" }]}>
         <View style={styles.placeholderVideo}>
           <Feather name="user" size={64} color="rgba(255,255,255,0.3)" />
           <ThemedText style={styles.placeholderText}>
             {translatorName}
           </ThemedText>
+          <ThemedText style={styles.connectingText}>
+            {isConnected ? "Connected" : "Connecting..."}
+          </ThemedText>
         </View>
       </View>
 
+      {/* Local Video (User Camera) */}
       <View style={[styles.localVideo, { top: insets.top + Spacing.lg }]}>
-        <View style={styles.localPlaceholder}>
-          <Feather name="user" size={24} color="rgba(255,255,255,0.5)" />
-        </View>
+        {cameraPermission?.granted && !isCameraOff ? (
+          <CameraView style={styles.camera} facing="front" />
+        ) : (
+          <View style={styles.localPlaceholder}>
+            <Feather
+              name={isCameraOff ? "video-off" : "user"}
+              size={24}
+              color="rgba(255,255,255,0.5)"
+            />
+          </View>
+        )}
       </View>
 
+      {/* Timer Badge */}
       <View style={[styles.timerContainer, { top: insets.top + Spacing.lg }]}>
         <View style={styles.timerBadge}>
-          <View style={styles.liveDot} />
+          <View
+            style={[
+              styles.liveDot,
+              { backgroundColor: isConnected ? "#22C55E" : "#EF4444" },
+            ]}
+          />
           <ThemedText style={styles.timerText}>
             {formatDuration(duration)}
           </ThemedText>
         </View>
       </View>
 
+      {/* Info Card */}
       {isInfoExpanded ? (
         <Pressable
           style={[styles.infoCard, { top: insets.top + Spacing.lg + 50 }]}
@@ -95,7 +138,10 @@ export default function CallScreen() {
           <View style={styles.infoDetails}>
             <View style={styles.infoItem}>
               <Feather
-                name={(categoryData?.icon as any) || "message-circle"}
+                name={
+                  (categoryData?.icon as keyof typeof Feather.glyphMap) ||
+                  "message-circle"
+                }
                 size={14}
                 color="rgba(255,255,255,0.7)"
               />
@@ -129,9 +175,11 @@ export default function CallScreen() {
         </Pressable>
       )}
 
+      {/* Call Controls */}
       <View
         style={[styles.controls, { paddingBottom: insets.bottom + Spacing.xl }]}
       >
+        {/* Mute Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
@@ -140,7 +188,7 @@ export default function CallScreen() {
               opacity: pressed ? 0.8 : 1,
             },
           ]}
-          onPress={() => setIsMuted(!isMuted)}
+          onPress={toggleMute}
         >
           <Feather
             name={isMuted ? "mic-off" : "mic"}
@@ -149,6 +197,7 @@ export default function CallScreen() {
           />
         </Pressable>
 
+        {/* Camera Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
@@ -157,7 +206,7 @@ export default function CallScreen() {
               opacity: pressed ? 0.8 : 1,
             },
           ]}
-          onPress={() => setIsCameraOff(!isCameraOff)}
+          onPress={toggleCamera}
         >
           <Feather
             name={isCameraOff ? "video-off" : "video"}
@@ -166,6 +215,7 @@ export default function CallScreen() {
           />
         </Pressable>
 
+        {/* End Call Button */}
         <Pressable
           style={({ pressed }) => [
             styles.endCallButton,
@@ -176,6 +226,7 @@ export default function CallScreen() {
           <Feather name="phone-off" size={28} color="#fff" />
         </Pressable>
 
+        {/* Switch Camera Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
@@ -188,6 +239,7 @@ export default function CallScreen() {
           <Feather name="repeat" size={24} color="#fff" />
         </Pressable>
 
+        {/* Chat Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
@@ -222,6 +274,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     ...Typography.h4,
   },
+  connectingText: {
+    color: "rgba(255,255,255,0.4)",
+    marginTop: Spacing.sm,
+    ...Typography.small,
+  },
   localVideo: {
     position: "absolute",
     right: Spacing.lg,
@@ -231,6 +288,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#2a2a3e",
     ...Shadows.card,
+  },
+  camera: {
+    flex: 1,
   },
   localPlaceholder: {
     flex: 1,
@@ -253,7 +313,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#EF4444",
     marginRight: Spacing.sm,
   },
   timerText: {

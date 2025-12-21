@@ -2,6 +2,7 @@ import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { registerPaymentRoutes } from "./payments";
+import { initializeSignaling } from "./signaling";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -23,7 +24,7 @@ function setupCors(app: express.Application) {
     }
 
     if (process.env.REPLIT_DOMAINS) {
-      process.env.REPLIT_DOMAINS.split(",").forEach((d) => {
+      process.env.REPLIT_DOMAINS.split(",").forEach((d: string) => {
         origins.add(`https://${d.trim()}`);
       });
     }
@@ -229,6 +230,10 @@ function setupErrorHandler(app: express.Application) {
 
   const server = await registerRoutes(app);
 
+  // Initialize WebSocket signaling server for real-time communication
+  const io = initializeSignaling(server);
+  log("WebSocket signaling server initialized");
+
   setupErrorHandler(app);
 
   const port = parseInt(process.env.PORT || "5000", 10);
@@ -239,7 +244,8 @@ function setupErrorHandler(app: express.Application) {
       reusePort: true,
     },
     () => {
-      log(`express server serving on port ${port}`);
+      log(`Express server serving on port ${port}`);
+      log(`WebSocket server ready for connections`);
     },
   );
 })();
