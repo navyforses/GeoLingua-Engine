@@ -8,7 +8,8 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Feather } from "@expo/vector-icons";
-import { StripeProvider } from "@stripe/stripe-react-native";
+// Stripe disabled for Expo Go testing - requires native build
+// import { StripeProvider } from "@stripe/stripe-react-native";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -19,7 +20,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { useTheme } from "@/hooks/useTheme";
-import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe";
+// import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,15 +65,14 @@ export default function App() {
         <SafeAreaProvider>
           <GestureHandlerRootView style={styles.root} onLayout={onLayoutRootView}>
             <KeyboardProvider>
-              <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-                <AuthProvider>
-                  <PaymentProvider>
-                    <NavigationContainer>
-                      <AppNavigator />
-                    </NavigationContainer>
-                  </PaymentProvider>
-                </AuthProvider>
-              </StripeProvider>
+              {/* StripeProvider disabled for Expo Go - enable for production build */}
+              <AuthProvider>
+                <PaymentProvider>
+                  <NavigationContainer>
+                    <AppNavigator />
+                  </NavigationContainer>
+                </PaymentProvider>
+              </AuthProvider>
               <StatusBar style="auto" />
             </KeyboardProvider>
           </GestureHandlerRootView>
