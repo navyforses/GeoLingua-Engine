@@ -1,109 +1,28 @@
-import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import React from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { useStripe } from "@stripe/stripe-react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { usePayment } from "@/contexts/PaymentContext";
 import { formatCurrency } from "@/lib/stripe";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 
-const PRESET_AMOUNTS = [10, 20, 50, 100];
+// Note: Stripe React Native is disabled for Expo Go compatibility
+// For production builds, uncomment the Stripe imports and implementation
 
 export default function TopUpWalletScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const navigation = useNavigation();
-  const { confirmPayment } = useStripe();
-  const {
-    walletBalance,
-    paymentMethods,
-    defaultPaymentMethodId,
-    topUpWallet,
-    fetchWalletBalance,
-  } = usePayment();
-
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(20);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const defaultCard = paymentMethods.find(
-    (m) => m.id === defaultPaymentMethodId,
-  );
-
-  const handleTopUp = async () => {
-    if (!selectedAmount) {
-      Alert.alert("Select Amount", "Please select an amount to top up");
-      return;
-    }
-
-    if (!defaultCard) {
-      Alert.alert("No Payment Method", "Please add a payment method first", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Add Card",
-          onPress: () => navigation.navigate("AddCard" as never),
-        },
-      ]);
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Create payment intent
-      const { clientSecret, error: intentError } =
-        await topUpWallet(selectedAmount);
-
-      if (intentError || !clientSecret) {
-        Alert.alert("Error", intentError || "Failed to create payment");
-        setIsLoading(false);
-        return;
-      }
-
-      // Confirm payment
-      const { error: paymentError } = await confirmPayment(clientSecret, {
-        paymentMethodType: "Card",
-        paymentMethodData: {
-          paymentMethodId: defaultPaymentMethodId!,
-        },
-      });
-
-      if (paymentError) {
-        Alert.alert("Payment Failed", paymentError.message);
-      } else {
-        await fetchWalletBalance();
-        Alert.alert(
-          "Success",
-          `${formatCurrency(selectedAmount)} has been added to your wallet`,
-          [{ text: "OK", onPress: () => navigation.goBack() }],
-        );
-      }
-    } catch (error) {
-      console.error("Top up error:", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
-    }
-
-    setIsLoading(false);
-  };
+  const { walletBalance } = usePayment();
 
   return (
     <ThemedView style={styles.container}>
-      <KeyboardAwareScrollViewCompat
-        style={{ flex: 1 }}
-        contentContainerStyle={[
+      <View
+        style={[
           styles.content,
           { paddingBottom: insets.bottom + Spacing.xl },
         ]}
@@ -120,133 +39,44 @@ export default function TopUpWalletScreen() {
           </ThemedText>
         </Card>
 
-        {/* Amount Selection */}
-        <View style={styles.section}>
-          <ThemedText type="h4" style={styles.sectionTitle}>
-            Select Amount
-          </ThemedText>
-          <View style={styles.amountGrid}>
-            {PRESET_AMOUNTS.map((amount) => (
-              <Pressable
-                key={amount}
-                style={[
-                  styles.amountButton,
-                  {
-                    backgroundColor:
-                      selectedAmount === amount
-                        ? theme.primary
-                        : theme.backgroundSecondary,
-                    borderColor:
-                      selectedAmount === amount ? theme.primary : theme.border,
-                  },
-                ]}
-                onPress={() => setSelectedAmount(amount)}
-              >
-                <ThemedText
-                  style={[
-                    styles.amountText,
-                    {
-                      color: selectedAmount === amount ? "#fff" : theme.text,
-                    },
-                  ]}
-                >
-                  {formatCurrency(amount)}
-                </ThemedText>
-              </Pressable>
-            ))}
+        <Card style={styles.card}>
+          <View style={styles.iconContainer}>
+            <View
+              style={[
+                styles.iconCircle,
+                { backgroundColor: theme.primary + "20" },
+              ]}
+            >
+              <Feather name="plus-circle" size={48} color={theme.primary} />
+            </View>
           </View>
-        </View>
 
-        {/* Payment Method */}
-        <View style={styles.section}>
-          <ThemedText type="h4" style={styles.sectionTitle}>
-            Payment Method
+          <ThemedText style={styles.title}>
+            საფულის შევსება
           </ThemedText>
-          {defaultCard ? (
-            <Card elevation={1} style={styles.cardPreview}>
-              <View style={styles.cardInfo}>
-                <View
-                  style={[
-                    styles.cardIcon,
-                    { backgroundColor: theme.backgroundSecondary },
-                  ]}
-                >
-                  <Feather name="credit-card" size={20} color={theme.text} />
-                </View>
-                <View style={styles.cardDetails}>
-                  <ThemedText style={styles.cardBrand}>
-                    •••• {defaultCard.card.last4}
-                  </ThemedText>
-                  <ThemedText
-                    style={[styles.cardExpiry, { color: theme.textSecondary }]}
-                  >
-                    Expires {defaultCard.card.expMonth}/
-                    {defaultCard.card.expYear}
-                  </ThemedText>
-                </View>
-              </View>
-              <Pressable
-                style={styles.changeButton}
-                onPress={() => navigation.navigate("PaymentMethods" as never)}
-              >
-                <ThemedText style={{ color: theme.primary }}>Change</ThemedText>
-              </Pressable>
-            </Card>
-          ) : (
-            <Card elevation={1} style={styles.noCardContainer}>
-              <Feather
-                name="credit-card"
-                size={32}
-                color={theme.textSecondary}
-              />
-              <ThemedText
-                style={[styles.noCardText, { color: theme.textSecondary }]}
-              >
-                No payment method added
-              </ThemedText>
-              <Button
-                onPress={() => navigation.navigate("AddCard" as never)}
-                style={styles.addCardButton}
-              >
-                Add Card
-              </Button>
-            </Card>
-          )}
-        </View>
+          
+          <ThemedText style={styles.subtitle}>
+            Top Up Wallet
+          </ThemedText>
 
-        {/* Summary */}
-        {selectedAmount && defaultCard && (
-          <Card elevation={1} style={styles.summaryCard}>
-            <View style={styles.summaryRow}>
-              <ThemedText style={{ color: theme.textSecondary }}>
-                Top Up Amount
-              </ThemedText>
-              <ThemedText style={styles.summaryValue}>
-                {formatCurrency(selectedAmount)}
+          <ThemedText style={[styles.message, { color: theme.textSecondary }]}>
+            ეს ფუნქცია მოითხოვს Stripe-ის ინტეგრაციას და ხელმისაწვდომია მხოლოდ პროდაქშენ ბილდში.
+          </ThemedText>
+          
+          <ThemedText style={[styles.messageEn, { color: theme.textSecondary }]}>
+            This feature requires Stripe integration and is available in production builds only.
+          </ThemedText>
+
+          {Platform.OS !== "web" && (
+            <View style={[styles.badge, { backgroundColor: theme.primary + "15" }]}>
+              <Feather name="info" size={16} color={theme.primary} />
+              <ThemedText style={[styles.badgeText, { color: theme.primary }]}>
+                Expo Go Preview Mode
               </ThemedText>
             </View>
-            <View style={[styles.divider, { backgroundColor: theme.border }]} />
-            <View style={styles.summaryRow}>
-              <ThemedText style={styles.totalLabel}>New Balance</ThemedText>
-              <ThemedText type="h4" style={{ color: theme.primary }}>
-                {formatCurrency((walletBalance?.amount || 0) + selectedAmount)}
-              </ThemedText>
-            </View>
-          </Card>
-        )}
-
-        <Button
-          onPress={handleTopUp}
-          disabled={isLoading || !selectedAmount || !defaultCard}
-          style={styles.topUpButton}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            `Top Up ${selectedAmount ? formatCurrency(selectedAmount) : ""}`
           )}
-        </Button>
-      </KeyboardAwareScrollViewCompat>
+        </Card>
+      </View>
     </ThemedView>
   );
 }
@@ -256,8 +86,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    flex: 1,
+    padding: Spacing.lg,
   },
   balanceCard: {
     alignItems: "center",
@@ -271,89 +101,51 @@ const styles = StyleSheet.create({
   balanceAmount: {
     letterSpacing: -1,
   },
-  section: {
-    marginBottom: Spacing.xl,
+  card: {
+    padding: Spacing.xl,
+    alignItems: "center",
   },
-  sectionTitle: {
+  iconContainer: {
     marginBottom: Spacing.lg,
   },
-  amountGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.md,
-  },
-  amountButton: {
-    flex: 1,
-    minWidth: "45%",
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  amountText: {
-    ...Typography.h4,
-  },
-  cardPreview: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: Spacing.lg,
-  },
-  cardInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.md,
+  iconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
   },
-  cardDetails: {
-    marginLeft: Spacing.md,
+  title: {
+    ...Typography.h3,
+    textAlign: "center",
+    marginBottom: Spacing.xs,
   },
-  cardBrand: {
-    ...Typography.bodyMedium,
-  },
-  cardExpiry: {
-    ...Typography.small,
-  },
-  changeButton: {
-    padding: Spacing.sm,
-  },
-  noCardContainer: {
-    alignItems: "center",
-    paddingVertical: Spacing.xl,
-  },
-  noCardText: {
-    ...Typography.body,
-    marginTop: Spacing.md,
+  subtitle: {
+    ...Typography.h4,
+    textAlign: "center",
     marginBottom: Spacing.lg,
   },
-  addCardButton: {
-    paddingHorizontal: Spacing.xl,
+  message: {
+    ...Typography.body,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: Spacing.sm,
   },
-  summaryCard: {
-    marginBottom: Spacing.xl,
-    padding: Spacing.lg,
+  messageEn: {
+    ...Typography.small,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
   },
-  summaryRow: {
+  badge: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
   },
-  summaryValue: {
-    ...Typography.bodyMedium,
-  },
-  totalLabel: {
-    ...Typography.bodyMedium,
-  },
-  divider: {
-    height: 1,
-    marginVertical: Spacing.md,
-  },
-  topUpButton: {
-    height: 52,
+  badgeText: {
+    ...Typography.small,
   },
 });
