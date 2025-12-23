@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { socketService } from "@/lib/socket";
+import { webRTCService } from "@/lib/webrtc";
 import { useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import { Audio } from "expo-av";
 
@@ -18,6 +19,8 @@ interface CallState {
   isCameraOff: boolean;
   isSpeakerOn: boolean;
   error: string | null;
+  remoteStream: MediaStream | null;
+  connectionState: RTCPeerConnectionState | "new";
 }
 
 interface CallParams {
@@ -37,6 +40,8 @@ export function useCall() {
     isCameraOff: false,
     isSpeakerOn: true,
     error: null,
+    remoteStream: null,
+    connectionState: "new",
   });
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -98,19 +103,23 @@ export function useCall() {
       totalPrice: number;
     }) => {
       stopTimer();
+      webRTCService.cleanup();
       setState((prev) => ({
         ...prev,
         status: "ended",
         duration: data.duration,
+        remoteStream: null,
       }));
     };
 
     const handlePeerDisconnected = (data: { reason: string }) => {
       stopTimer();
+      webRTCService.cleanup();
       setState((prev) => ({
         ...prev,
         status: "ended",
         error: data.reason,
+        remoteStream: null,
       }));
     };
 
@@ -123,10 +132,11 @@ export function useCall() {
       socketService.off("call-ended", handleCallEnded);
       socketService.off("peer-disconnected", handlePeerDisconnected);
       stopTimer();
+      webRTCService.cleanup();
     };
   }, [startTimer, stopTimer]);
 
-  // Start call
+  // Start call with WebRTC
   const startCall = useCallback(
     async (params: CallParams) => {
       const hasPermissions = await requestPermissions();
@@ -146,10 +156,56 @@ export function useCall() {
         roomId: params.roomId,
       }));
 
-      // Notify server that we're connected
-      socketService.notifyCallConnected(params.roomId);
+      try {
+        // Initialize WebRTC service
+        await webRTCService.initialize(params.roomId, {
+          onRemoteStream: (stream) => {
+            console.log("[useCall] Remote stream received");
+            setState((prev) => ({ ...prev, remoteStream: stream }));
+          },
+          onConnectionStateChange: (connectionState) => {
+            console.log("[useCall] Connection state:", connectionState);
+            setState((prev) => ({ ...prev, connectionState }));
 
-      return true;
+            if (connectionState === "connected") {
+              setState((prev) => ({ ...prev, status: "connected" }));
+            } else if (connectionState === "failed" || connectionState === "disconnected") {
+              setState((prev) => ({
+                ...prev,
+                status: "failed",
+                error: "Connection lost",
+              }));
+            }
+          },
+          onError: (error) => {
+            console.error("[useCall] WebRTC error:", error);
+            setState((prev) => ({
+              ...prev,
+              status: "failed",
+              error: error.message,
+            }));
+          },
+        });
+
+        // Get local media stream for WebRTC
+        await webRTCService.getLocalStream(true, true);
+
+        // Create peer connection
+        await webRTCService.createPeerConnection();
+
+        // Notify server that we're connected
+        socketService.notifyCallConnected(params.roomId);
+
+        return true;
+      } catch (error) {
+        console.error("[useCall] Error starting call:", error);
+        setState((prev) => ({
+          ...prev,
+          status: "failed",
+          error: "Failed to establish connection",
+        }));
+        return false;
+      }
     },
     [requestPermissions],
   );
@@ -157,6 +213,7 @@ export function useCall() {
   // End call
   const endCall = useCallback(() => {
     stopTimer();
+    webRTCService.cleanup();
 
     if (state.roomId) {
       socketService.endCall(state.roomId, state.duration);
@@ -165,6 +222,7 @@ export function useCall() {
     setState((prev) => ({
       ...prev,
       status: "ended",
+      remoteStream: null,
     }));
 
     return state.duration;
@@ -172,13 +230,17 @@ export function useCall() {
 
   // Toggle mute
   const toggleMute = useCallback(() => {
-    setState((prev) => ({ ...prev, isMuted: !prev.isMuted }));
-  }, []);
+    const newMuted = !state.isMuted;
+    webRTCService.toggleAudio(!newMuted);
+    setState((prev) => ({ ...prev, isMuted: newMuted }));
+  }, [state.isMuted]);
 
   // Toggle camera
   const toggleCamera = useCallback(() => {
-    setState((prev) => ({ ...prev, isCameraOff: !prev.isCameraOff }));
-  }, []);
+    const newCameraOff = !state.isCameraOff;
+    webRTCService.toggleVideo(!newCameraOff);
+    setState((prev) => ({ ...prev, isCameraOff: newCameraOff }));
+  }, [state.isCameraOff]);
 
   // Toggle speaker
   const toggleSpeaker = useCallback(async () => {
@@ -195,9 +257,15 @@ export function useCall() {
     setState((prev) => ({ ...prev, isSpeakerOn: newSpeakerState }));
   }, [state.isSpeakerOn]);
 
+  // Switch camera
+  const switchCamera = useCallback(async () => {
+    await webRTCService.switchCamera();
+  }, []);
+
   // Reset call state
   const reset = useCallback(() => {
     stopTimer();
+    webRTCService.cleanup();
     setState({
       status: "idle",
       roomId: null,
@@ -206,6 +274,8 @@ export function useCall() {
       isCameraOff: false,
       isSpeakerOn: true,
       error: null,
+      remoteStream: null,
+      connectionState: "new",
     });
   }, [stopTimer]);
 
@@ -217,6 +287,7 @@ export function useCall() {
     toggleMute,
     toggleCamera,
     toggleSpeaker,
+    switchCamera,
     reset,
     isConnecting: state.status === "connecting",
     isConnected: state.status === "connected",

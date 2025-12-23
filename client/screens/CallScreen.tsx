@@ -5,6 +5,13 @@ import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Feather } from "@expo/vector-icons";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Typography, Shadows } from "@/constants/theme";
@@ -28,6 +35,7 @@ export default function CallScreen() {
 
   const [isInfoExpanded, setIsInfoExpanded] = useState(true);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [cameraFacing, setCameraFacing] = useState<"front" | "back">("front");
 
   const {
     duration,
@@ -37,8 +45,31 @@ export default function CallScreen() {
     toggleCamera,
     endCall,
     startCall,
+    switchCamera,
     isConnected,
+    isConnecting,
+    connectionState,
+    remoteStream,
   } = useCall();
+
+  // Pulse animation for connecting state
+  const pulseOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (isConnecting || connectionState === "connecting") {
+      pulseOpacity.value = withRepeat(
+        withTiming(0.3, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+    } else {
+      pulseOpacity.value = 1;
+    }
+  }, [isConnecting, connectionState]);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    opacity: pulseOpacity.value,
+  }));
 
   // Start call when screen mounts
   useEffect(() => {
@@ -76,27 +107,78 @@ export default function CallScreen() {
     });
   };
 
+  const handleSwitchCamera = () => {
+    setCameraFacing((prev) => (prev === "front" ? "back" : "front"));
+    switchCamera();
+  };
+
   const currentPrice = Math.ceil(duration / 60) * pricePerMinute;
+
+  // Get connection status text
+  const getConnectionStatusText = () => {
+    if (isConnected) return "Connected";
+    if (connectionState === "connecting") return "Establishing connection...";
+    if (connectionState === "failed") return "Connection failed";
+    if (connectionState === "disconnected") return "Disconnected";
+    return "Connecting...";
+  };
+
+  // Get connection status color
+  const getConnectionStatusColor = () => {
+    if (isConnected) return "#22C55E";
+    if (connectionState === "failed" || connectionState === "disconnected") return "#EF4444";
+    return "#F59E0B";
+  };
 
   return (
     <View style={styles.container}>
-      {/* Remote Video (Translator) - Placeholder for now */}
+      {/* Remote Video (Translator) */}
       <View style={[styles.remoteVideo, { backgroundColor: "#1a1a2e" }]}>
-        <View style={styles.placeholderVideo}>
-          <Feather name="user" size={64} color="rgba(255,255,255,0.3)" />
-          <ThemedText style={styles.placeholderText}>
-            {translatorName}
-          </ThemedText>
-          <ThemedText style={styles.connectingText}>
-            {isConnected ? "Connected" : "Connecting..."}
-          </ThemedText>
-        </View>
+        {remoteStream ? (
+          // When WebRTC is working and we have a remote stream
+          // This will need RTCView from react-native-webrtc in a dev build
+          <View style={styles.placeholderVideo}>
+            <Feather name="video" size={64} color="rgba(255,255,255,0.5)" />
+            <ThemedText style={styles.placeholderText}>
+              {translatorName}
+            </ThemedText>
+            <ThemedText style={styles.connectingText}>
+              Video stream active
+            </ThemedText>
+          </View>
+        ) : (
+          // Placeholder when no remote stream
+          <Animated.View style={[styles.placeholderVideo, pulseStyle]}>
+            <View style={styles.avatarCircle}>
+              <Feather name="user" size={48} color="rgba(255,255,255,0.6)" />
+            </View>
+            <ThemedText style={styles.placeholderText}>
+              {translatorName}
+            </ThemedText>
+            <View style={styles.statusContainer}>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: getConnectionStatusColor() },
+                ]}
+              />
+              <ThemedText style={styles.connectingText}>
+                {getConnectionStatusText()}
+              </ThemedText>
+            </View>
+            {!isConnected && (
+              <ThemedText style={styles.webrtcNote}>
+                WebRTC: {connectionState}
+              </ThemedText>
+            )}
+          </Animated.View>
+        )}
       </View>
 
       {/* Local Video (User Camera) */}
       <View style={[styles.localVideo, { top: insets.top + Spacing.lg }]}>
         {cameraPermission?.granted && !isCameraOff ? (
-          <CameraView style={styles.camera} facing="front" />
+          <CameraView style={styles.camera} facing={cameraFacing} />
         ) : (
           <View style={styles.localPlaceholder}>
             <Feather
@@ -114,7 +196,7 @@ export default function CallScreen() {
           <View
             style={[
               styles.liveDot,
-              { backgroundColor: isConnected ? "#22C55E" : "#EF4444" },
+              { backgroundColor: isConnected ? "#22C55E" : "#F59E0B" },
             ]}
           />
           <ThemedText style={styles.timerText}>
@@ -206,18 +288,19 @@ export default function CallScreen() {
             styles.controlButton,
             { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
+          onPress={handleSwitchCamera}
         >
-          <Feather name="repeat" size={24} color="#fff" />
+          <Feather name="refresh-cw" size={24} color="#fff" />
         </Pressable>
 
-        {/* Chat Button */}
+        {/* Speaker Button */}
         <Pressable
           style={({ pressed }) => [
             styles.controlButton,
             { backgroundColor: "rgba(255,255,255,0.2)", opacity: pressed ? 0.8 : 1 },
           ]}
         >
-          <Feather name="message-square" size={24} color="#fff" />
+          <Feather name="volume-2" size={24} color="#fff" />
         </Pressable>
       </View>
     </View>
@@ -237,15 +320,39 @@ const styles = StyleSheet.create({
   placeholderVideo: {
     alignItems: "center",
   },
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.md,
+  },
   placeholderText: {
-    color: "rgba(255,255,255,0.5)",
-    marginTop: Spacing.md,
+    color: "rgba(255,255,255,0.7)",
+    marginTop: Spacing.sm,
     ...Typography.h4,
   },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: Spacing.md,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: Spacing.sm,
+  },
   connectingText: {
-    color: "rgba(255,255,255,0.4)",
-    marginTop: Spacing.sm,
+    color: "rgba(255,255,255,0.5)",
     ...Typography.small,
+  },
+  webrtcNote: {
+    color: "rgba(255,255,255,0.3)",
+    marginTop: Spacing.lg,
+    ...Typography.tiny,
   },
   localVideo: {
     position: "absolute",
