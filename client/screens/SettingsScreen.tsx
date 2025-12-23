@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Switch, Pressable } from "react-native";
+import { View, StyleSheet, Switch, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
@@ -7,6 +7,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { ThemedText } from "@/components/ThemedText";
 import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/contexts/AuthContext";
 import { Spacing, Typography } from "@/constants/theme";
 
 interface SettingItemProps {
@@ -62,11 +63,27 @@ function SettingItem({ icon, label, description, value, onValueChange, onPress }
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { role, switchRole } = useAuth();
 
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
   const [autoAccept, setAutoAccept] = useState(false);
+
+  const handleSwitchRole = () => {
+    const newRole = role === "client" ? "translator" : "client";
+    Alert.alert(
+      "Switch Role",
+      `Switch to ${newRole === "translator" ? "Translator" : "Client"} mode?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Switch",
+          onPress: () => switchRole(),
+        },
+      ]
+    );
+  };
 
   return (
     <KeyboardAwareScrollViewCompat
@@ -115,6 +132,18 @@ export default function SettingsScreen() {
           description="Automatically accept incoming calls"
           value={autoAccept}
           onValueChange={setAutoAccept}
+        />
+      </Card>
+
+      <ThemedText style={[styles.sectionHeader, { color: theme.textSecondary }]}>
+        ACCOUNT
+      </ThemedText>
+      <Card elevation={1} style={styles.card}>
+        <SettingItem
+          icon="repeat"
+          label="Switch Role"
+          description={`Currently: ${role === "translator" ? "Translator" : "Client"}`}
+          onPress={handleSwitchRole}
         />
       </Card>
 

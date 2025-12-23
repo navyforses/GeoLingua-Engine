@@ -15,11 +15,14 @@ import {
   updateUserProfile as supabaseUpdateProfile,
 } from "@/lib/supabase";
 
+type UserRole = "client" | "translator" | null;
+
 interface AuthState {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  role: UserRole;
 }
 
 interface AuthContextType extends AuthState {
@@ -31,6 +34,7 @@ interface AuthContextType extends AuthState {
     email: string,
     password: string,
     name: string,
+    role?: UserRole,
   ) => Promise<{ error: AuthError | null; needsConfirmation: boolean }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
@@ -40,6 +44,8 @@ interface AuthContextType extends AuthState {
     phone?: string;
   }) => Promise<{ error: AuthError | null }>;
   refreshSession: () => Promise<void>;
+  setRole: (role: UserRole) => void;
+  switchRole: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session: null,
     isLoading: true,
     isAuthenticated: false,
+    role: null,
   });
 
   // Initialize auth state
@@ -61,12 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession();
 
-        setState({
+        setState((prev) => ({
+          ...prev,
           user: session?.user ?? null,
           session: session,
           isLoading: false,
           isAuthenticated: !!session,
-        });
+        }));
       } catch (error) {
         console.error("Error initializing auth:", error);
         setState((prev) => ({ ...prev, isLoading: false }));
@@ -81,12 +89,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
 
-      setState({
+      setState((prev) => ({
+        ...prev,
         user: session?.user ?? null,
         session: session,
         isLoading: false,
         isAuthenticated: !!session,
-      });
+      }));
     });
 
     return () => {
@@ -133,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session: null,
         isLoading: false,
         isAuthenticated: false,
+        role: null,
       });
     } else {
       setState((prev) => ({ ...prev, isLoading: false }));
@@ -176,6 +186,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const setRole = useCallback((role: UserRole) => {
+    setState((prev) => ({ ...prev, role }));
+  }, []);
+
+  const switchRole = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      role: prev.role === "client" ? "translator" : "client",
+    }));
+  }, []);
+
   const value: AuthContextType = {
     ...state,
     signIn,
@@ -184,6 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetPassword,
     updateProfile,
     refreshSession,
+    setRole,
+    switchRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
