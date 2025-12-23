@@ -16,16 +16,18 @@ import { queryClient } from "@/lib/query-client";
 
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import AuthStackNavigator from "@/navigation/AuthStackNavigator";
+import TranslatorStackNavigator from "@/navigation/TranslatorStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { useTheme } from "@/hooks/useTheme";
+import RoleSelectionScreen from "@/screens/RoleSelectionScreen";
 // import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe";
 
 SplashScreen.preventAutoHideAsync();
 
 function AppNavigator() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, role } = useAuth();
   const { theme } = useTheme();
 
   if (isLoading) {
@@ -41,7 +43,17 @@ function AppNavigator() {
     );
   }
 
-  return isAuthenticated ? <RootStackNavigator /> : <AuthStackNavigator />;
+  if (!isAuthenticated) {
+    return <AuthStackNavigator />;
+  }
+
+  // User is authenticated but hasn't selected a role yet
+  if (!role) {
+    return <RoleSelectionScreen />;
+  }
+
+  // Show appropriate navigator based on role
+  return role === "translator" ? <TranslatorStackNavigator /> : <RootStackNavigator />;
 }
 
 export default function App() {

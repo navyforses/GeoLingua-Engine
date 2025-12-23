@@ -1,178 +1,67 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import React from "react";
+import { View, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { CardField, useStripe } from "@stripe/stripe-react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
-import { usePayment } from "@/contexts/PaymentContext";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+
+// Note: Stripe React Native is disabled for Expo Go compatibility
+// For production builds, uncomment the Stripe imports and implementation
 
 export default function AddCardScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const navigation = useNavigation();
-  const { createPaymentMethod } = useStripe();
-  const { addPaymentMethod } = usePayment();
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [cardComplete, setCardComplete] = useState(false);
-
-  const handleAddCard = async () => {
-    if (!cardComplete) {
-      Alert.alert("Incomplete", "Please fill in all card details");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      // Create payment method using Stripe
-      const { paymentMethod, error } = await createPaymentMethod({
-        paymentMethodType: "Card",
-      });
-
-      if (error) {
-        Alert.alert("Error", error.message);
-        setIsLoading(false);
-        return;
-      }
-
-      if (paymentMethod) {
-        // Add payment method to user's account
-        const result = await addPaymentMethod(paymentMethod.id);
-
-        if (result.error) {
-          Alert.alert("Error", result.error);
-        } else {
-          Alert.alert("Success", "Card added successfully", [
-            { text: "OK", onPress: () => navigation.goBack() },
-          ]);
-        }
-      }
-    } catch (error) {
-      console.error("Error adding card:", error);
-      Alert.alert("Error", "Failed to add card. Please try again.");
-    }
-
-    setIsLoading(false);
-  };
 
   return (
     <ThemedView style={styles.container}>
-      <KeyboardAwareScrollViewCompat
-        style={{ flex: 1 }}
-        contentContainerStyle={[
+      <View
+        style={[
           styles.content,
           { paddingBottom: insets.bottom + Spacing.xl },
         ]}
-        keyboardShouldPersistTaps="handled"
       >
-        <Card elevation={1} style={styles.cardInputContainer}>
-          <ThemedText type="h4" style={styles.cardTitle}>
-            Card Details
-          </ThemedText>
-          <ThemedText
-            style={[styles.cardSubtitle, { color: theme.textSecondary }]}
-          >
-            Enter your card information below
-          </ThemedText>
-
-          <View style={styles.cardFieldWrapper}>
-            <CardField
-              postalCodeEnabled={false}
-              placeholders={{
-                number: "4242 4242 4242 4242",
-              }}
-              cardStyle={{
-                backgroundColor: theme.backgroundSecondary,
-                textColor: theme.text,
-                borderColor: theme.border,
-                borderWidth: 1,
-                borderRadius: BorderRadius.md,
-                fontSize: 16,
-                placeholderColor: theme.textSecondary,
-              }}
-              style={styles.cardField}
-              onCardChange={(details) => {
-                setCardComplete(details.complete);
-              }}
-            />
-          </View>
-        </Card>
-
-        <Card elevation={1} style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Feather name="lock" size={18} color={theme.primary} />
-            <ThemedText
-              style={[styles.infoText, { color: theme.textSecondary }]}
-            >
-              Your card information is encrypted and securely processed
-            </ThemedText>
-          </View>
-          <View style={[styles.infoRow, { marginTop: Spacing.md }]}>
-            <Feather name="shield" size={18} color={theme.primary} />
-            <ThemedText
-              style={[styles.infoText, { color: theme.textSecondary }]}
-            >
-              We never store your full card number
-            </ThemedText>
-          </View>
-        </Card>
-
-        {/* Supported Cards */}
-        <View style={styles.supportedCards}>
-          <ThemedText
-            style={[styles.supportedTitle, { color: theme.textSecondary }]}
-          >
-            Supported Cards
-          </ThemedText>
-          <View style={styles.cardLogos}>
+        <Card style={styles.card}>
+          <View style={styles.iconContainer}>
             <View
               style={[
-                styles.cardLogo,
-                { backgroundColor: theme.backgroundSecondary },
+                styles.iconCircle,
+                { backgroundColor: theme.primary + "20" },
               ]}
             >
-              <ThemedText style={styles.cardLogoText}>VISA</ThemedText>
-            </View>
-            <View
-              style={[
-                styles.cardLogo,
-                { backgroundColor: theme.backgroundSecondary },
-              ]}
-            >
-              <ThemedText style={styles.cardLogoText}>MC</ThemedText>
-            </View>
-            <View
-              style={[
-                styles.cardLogo,
-                { backgroundColor: theme.backgroundSecondary },
-              ]}
-            >
-              <ThemedText style={styles.cardLogoText}>AMEX</ThemedText>
+              <Feather name="credit-card" size={48} color={theme.primary} />
             </View>
           </View>
-        </View>
 
-        <Button
-          onPress={handleAddCard}
-          disabled={isLoading || !cardComplete}
-          style={styles.addButton}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            "Add Card"
+          <ThemedText style={styles.title}>
+            გადახდის მეთოდები
+          </ThemedText>
+          
+          <ThemedText style={styles.subtitle}>
+            Payment Methods
+          </ThemedText>
+
+          <ThemedText style={[styles.message, { color: theme.textSecondary }]}>
+            ეს ფუნქცია მოითხოვს Stripe-ის ინტეგრაციას და ხელმისაწვდომია მხოლოდ პროდაქშენ ბილდში.
+          </ThemedText>
+          
+          <ThemedText style={[styles.messageEn, { color: theme.textSecondary }]}>
+            This feature requires Stripe integration and is available in production builds only.
+          </ThemedText>
+
+          {Platform.OS !== "web" && (
+            <View style={[styles.badge, { backgroundColor: theme.primary + "15" }]}>
+              <Feather name="info" size={16} color={theme.primary} />
+              <ThemedText style={[styles.badgeText, { color: theme.primary }]}>
+                Expo Go Preview Mode
+              </ThemedText>
+            </View>
           )}
-        </Button>
-      </KeyboardAwareScrollViewCompat>
+        </Card>
+      </View>
     </ThemedView>
   );
 }
@@ -182,61 +71,55 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    flex: 1,
+    padding: Spacing.lg,
+    justifyContent: "center",
   },
-  cardInputContainer: {
+  card: {
+    padding: Spacing.xl,
+    alignItems: "center",
+  },
+  iconContainer: {
     marginBottom: Spacing.lg,
   },
-  cardTitle: {
+  iconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    ...Typography.h3,
+    textAlign: "center",
     marginBottom: Spacing.xs,
   },
-  cardSubtitle: {
-    ...Typography.small,
-    marginBottom: Spacing.xl,
+  subtitle: {
+    ...Typography.h4,
+    textAlign: "center",
+    marginBottom: Spacing.lg,
   },
-  cardFieldWrapper: {
+  message: {
+    ...Typography.body,
+    textAlign: "center",
+    lineHeight: 22,
     marginBottom: Spacing.sm,
   },
-  cardField: {
-    width: "100%",
-    height: 50,
+  messageEn: {
+    ...Typography.small,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
   },
-  infoCard: {
-    marginBottom: Spacing.xl,
-    padding: Spacing.lg,
-  },
-  infoRow: {
+  badge: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  infoText: {
-    ...Typography.small,
-    marginLeft: Spacing.sm,
-    flex: 1,
-  },
-  supportedCards: {
-    alignItems: "center",
-    marginBottom: Spacing.xl,
-  },
-  supportedTitle: {
-    ...Typography.small,
-    marginBottom: Spacing.md,
-  },
-  cardLogos: {
-    flexDirection: "row",
-    gap: Spacing.sm,
-  },
-  cardLogo: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
   },
-  cardLogoText: {
+  badgeText: {
     ...Typography.small,
-    fontWeight: "700",
-  },
-  addButton: {
-    height: 52,
   },
 });
