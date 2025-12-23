@@ -25,11 +25,13 @@ class SocketService {
     console.log("Connecting to socket server:", url);
 
     this.socket = io(url, {
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
+      timeout: 20000,
+      forceNew: true,
     });
 
     this.socket.on("connect", () => {
