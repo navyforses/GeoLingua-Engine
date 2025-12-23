@@ -11,6 +11,9 @@ export function getApiUrl(): string {
     throw new Error("EXPO_PUBLIC_DOMAIN is not set");
   }
 
+  // Remove port suffix if present (Replit proxies port 5000 through main domain)
+  host = host.replace(/:5000$/, '');
+
   let url = new URL(`https://${host}`);
 
   return url.href;
