@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, ActivityIndicator, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -8,8 +8,6 @@ import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Feather } from "@expo/vector-icons";
-// Stripe disabled for Expo Go testing - requires native build
-// import { StripeProvider } from "@stripe/stripe-react-native";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -22,7 +20,6 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { useTheme } from "@/hooks/useTheme";
 import RoleSelectionScreen from "@/screens/RoleSelectionScreen";
-// import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -60,14 +57,24 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     ...Feather.font,
   });
+  const [appIsReady, setAppIsReady] = useState(false);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
+  useEffect(() => {
+    async function prepare() {
+      try {
+        if (fontsLoaded) {
+          await SplashScreen.hideAsync();
+          setAppIsReady(true);
+        }
+      } catch (e) {
+        console.warn("Error hiding splash screen:", e);
+        setAppIsReady(true);
+      }
     }
+    prepare();
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !appIsReady) {
     return null;
   }
 
@@ -75,9 +82,8 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <GestureHandlerRootView style={styles.root} onLayout={onLayoutRootView}>
+          <GestureHandlerRootView style={styles.root}>
             <KeyboardProvider>
-              {/* StripeProvider disabled for Expo Go - enable for production build */}
               <AuthProvider>
                 <PaymentProvider>
                   <NavigationContainer>
