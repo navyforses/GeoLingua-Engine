@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   webrtcNote: {
     color: "rgba(255,255,255,0.3)",
     marginTop: Spacing.lg,
-    ...Typography.tiny,
+    ...Typography.caption,
   },
   localVideo: {
     position: "absolute",

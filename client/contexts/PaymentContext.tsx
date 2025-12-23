@@ -11,6 +11,7 @@ import {
   WalletBalance,
   Transaction,
   STRIPE_API,
+  STRIPE_PUBLISHABLE_KEY,
 } from "@/lib/stripe";
 
 interface PaymentState {
@@ -287,9 +288,9 @@ export function PaymentProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: false }));
   }, [fetchPaymentMethods, fetchWalletBalance, fetchTransactions]);
 
-  // Fetch data when authenticated
+  // Fetch data when authenticated (only if Stripe is configured)
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && STRIPE_PUBLISHABLE_KEY) {
       refreshAll();
     } else {
       setState({

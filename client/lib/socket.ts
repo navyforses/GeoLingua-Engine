@@ -1,20 +1,14 @@
 import { io, Socket } from "socket.io-client";
-import Constants from "expo-constants";
+import { getApiUrl } from "./query-client";
 
-// Get the API URL from environment or use default
+// Get the socket URL - uses the same domain as API
 const getSocketUrl = (): string => {
-  // In development, use the local server
-  if (__DEV__) {
-    // For Expo, we need to use the correct host
-    const debuggerHost = Constants.expoConfig?.hostUri?.split(":")[0];
-    if (debuggerHost) {
-      return `http://${debuggerHost}:5000`;
-    }
+  try {
+    return getApiUrl();
+  } catch {
+    // Fallback for when EXPO_PUBLIC_DOMAIN is not set
     return "http://localhost:5000";
   }
-
-  // In production, use the production server URL
-  return process.env.EXPO_PUBLIC_API_URL || "https://your-production-url.com";
 };
 
 class SocketService {
