@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, ActivityIndicator, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -6,6 +6,8 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import * as Font from "expo-font";
+import { Feather } from "@expo/vector-icons";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -52,22 +54,36 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
   useEffect(() => {
-    async function hideSplash() {
+    async function prepare() {
       try {
-        await SplashScreen.hideAsync();
+        await Font.loadAsync(Feather.font);
       } catch (e) {
-        console.warn("Error hiding splash screen:", e);
+        console.warn("Font loading error:", e);
+      } finally {
+        setAppIsReady(true);
       }
     }
-    hideSplash();
+    prepare();
   }, []);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <GestureHandlerRootView style={styles.root}>
+          <GestureHandlerRootView style={styles.root} onLayout={onLayoutRootView}>
             <KeyboardProvider>
               <AuthProvider>
                 <PaymentProvider>
