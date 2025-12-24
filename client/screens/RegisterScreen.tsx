@@ -5,6 +5,7 @@ import {
   TextInput,
   Pressable,
   Alert,
+  Platform,
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -78,6 +79,15 @@ export default function RegisterScreen() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const showAlert = (title: string, message: string, onOk?: () => void) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n\n${message}`);
+      if (onOk) onOk();
+    } else {
+      Alert.alert(title, message, onOk ? [{ text: "OK", onPress: onOk }] : undefined);
+    }
+  };
+
   const handleRegister = async () => {
     if (!validateForm()) return;
 
@@ -88,20 +98,15 @@ export default function RegisterScreen() {
     );
 
     if (error) {
-      Alert.alert(
+      showAlert(
         "Registration Failed",
         error.message || "An error occurred during registration",
       );
     } else if (needsConfirmation) {
-      Alert.alert(
+      showAlert(
         "Check Your Email",
         "We've sent you a confirmation email. Please click the link to verify your account.",
-        [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
-          },
-        ],
+        () => navigation.navigate("Login"),
       );
     }
   };

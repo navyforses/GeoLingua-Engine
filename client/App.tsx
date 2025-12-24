@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, ActivityIndicator, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -7,9 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import { Feather } from "@expo/vector-icons";
-// Stripe disabled for Expo Go testing - requires native build
-// import { StripeProvider } from "@stripe/stripe-react-native";
+import { Feather, MaterialIcons, Ionicons, FontAwesome } from "@expo/vector-icons";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client";
@@ -22,7 +20,6 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { useTheme } from "@/hooks/useTheme";
 import RoleSelectionScreen from "@/screens/RoleSelectionScreen";
-// import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,11 +56,15 @@ function AppNavigator() {
 export default function App() {
   const [fontsLoaded] = useFonts({
     ...Feather.font,
+    ...MaterialIcons.font,
+    ...Ionicons.font,
+    ...FontAwesome.font,
   });
 
-  const onLayoutRootView = useCallback(async () => {
+  useEffect(() => {
     if (fontsLoaded) {
-      await SplashScreen.hideAsync();
+      console.log("Fonts loaded successfully");
+      SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
@@ -75,9 +76,8 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <GestureHandlerRootView style={styles.root} onLayout={onLayoutRootView}>
+          <GestureHandlerRootView style={styles.root}>
             <KeyboardProvider>
-              {/* StripeProvider disabled for Expo Go - enable for production build */}
               <AuthProvider>
                 <PaymentProvider>
                   <NavigationContainer>
