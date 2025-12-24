@@ -1,22 +1,36 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import Constants from "expo-constants";
 
 /**
- * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
+ * Gets the base URL for the Express API server (e.g., "https://your-replit-domain.replit.dev")
  * @returns {string} The API base URL
  */
 export function getApiUrl(): string {
-  let host = process.env.EXPO_PUBLIC_DOMAIN;
+  // Try to get from Expo Constants extra (set in app.config.js)
+  const extra = Constants.expoConfig?.extra;
 
-  if (!host) {
-    throw new Error("EXPO_PUBLIC_DOMAIN is not set");
+  // Priority 1: Check app.config.js extra
+  if (extra?.apiDomain) {
+    return `https://${extra.apiDomain}/`;
   }
 
-  // Remove port suffix if present (Replit proxies port 5000 through main domain)
-  host = host.replace(/:5000$/, '');
+  // Priority 2: Check environment variable directly
+  let host = process.env.EXPO_PUBLIC_DOMAIN || extra?.EXPO_PUBLIC_DOMAIN;
+  if (host) {
+    // Remove port suffix if present (Replit proxies port 5000 through main domain)
+    host = host.replace(/:5000$/, "");
+    return `https://${host}/`;
+  }
 
-  let url = new URL(`https://${host}`);
+  // Priority 3: For development with Metro bundler on same network
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  if (debuggerHost) {
+    const devHost = debuggerHost.split(":")[0];
+    return `http://${devHost}:5000/`;
+  }
 
-  return url.href;
+  // Last resort fallback
+  return "http://localhost:5000/";
 }
 
 async function throwIfResNotOk(res: Response) {
