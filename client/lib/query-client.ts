@@ -2,6 +2,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 /**
  * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
+ * For HTTP API requests, Replit proxies port 5000 through the main domain
  * @returns {string} The API base URL
  */
 export function getApiUrl(): string {
@@ -17,6 +18,27 @@ export function getApiUrl(): string {
   let url = new URL(`https://${host}`);
 
   return url.href;
+}
+
+/**
+ * Gets the Socket.IO server URL with explicit port 5000
+ * Socket.IO needs direct connection to Express server, not through Replit's proxy
+ * @returns {string} The Socket.IO server URL
+ */
+export function getSocketUrl(): string {
+  let host = process.env.EXPO_PUBLIC_DOMAIN;
+
+  if (!host) {
+    // Fallback for local development
+    return "http://localhost:5000";
+  }
+
+  // Ensure we have :5000 port for Socket.IO direct connection
+  if (!host.includes(":5000")) {
+    host = host + ":5000";
+  }
+
+  return `https://${host}`;
 }
 
 async function throwIfResNotOk(res: Response) {

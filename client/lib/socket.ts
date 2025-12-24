@@ -1,15 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { getApiUrl } from "./query-client";
-
-// Get the socket URL - uses the same domain as API
-const getSocketUrl = (): string => {
-  try {
-    return getApiUrl();
-  } catch {
-    // Fallback for when EXPO_PUBLIC_DOMAIN is not set
-    return "http://localhost:5000";
-  }
-};
+import { getSocketUrl } from "./query-client";
 
 class SocketService {
   private socket: Socket | null = null;
@@ -21,7 +11,12 @@ class SocketService {
       return this.socket;
     }
 
-    const url = getSocketUrl();
+    let url: string;
+    try {
+      url = getSocketUrl();
+    } catch {
+      url = "http://localhost:5000";
+    }
     console.log("Connecting to socket server:", url);
 
     this.socket = io(url, {
