@@ -55,6 +55,13 @@ export default {
         },
       ],
       "expo-web-browser",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          cameraPermission: "GeoLingua საჭიროებს კამერის წვდომას ვიდეო ზარებისთვის",
+          microphonePermission: "GeoLingua საჭიროებს მიკროფონის წვდომას ხმოვანი ზარებისთვის",
+        },
+      ],
     ],
     experiments: {
       reactCompiler: true,
