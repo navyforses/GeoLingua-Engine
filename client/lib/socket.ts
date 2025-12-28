@@ -45,6 +45,7 @@ const getSocketUrl = (): string => {
   console.warn("No valid socket URL found, using localhost fallback");
   return "http://localhost:5000";
 };
+import { getSocketUrl } from "./query-client";
 
 class SocketService {
   private socket: Socket | null = null;
@@ -60,6 +61,13 @@ class SocketService {
     const url = getSocketUrl();
     console.log("=== SOCKET CONNECTION ATTEMPT ===");
     console.log("Target URL:", url);
+    let url: string;
+    try {
+      url = getSocketUrl();
+    } catch {
+      url = "http://localhost:5000";
+    }
+    console.log("Connecting to socket server:", url);
 
     this.socket = io(url, {
       transports: ["polling", "websocket"],
